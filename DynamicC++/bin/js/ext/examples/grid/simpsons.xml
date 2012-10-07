@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Items>
+	<Item>
+		<Name>Homer Simpson</Name>
+		<Address>Springfield</Address>
+		<Age>42</Age>
+	</Item>
+	<Item>
+		<Name>Marge Simpson</Name>
+		<Address>Springfield</Address>
+		<Age>38</Age>
+	</Item>
+	<Item>
+		<Name>Bart Simpson</Name>
+		<Address>Springfield</Address>
+		<Age>12</Age>
+	</Item>
+	<Item>
+		<Name>Lisa Simpson</Name>
+		<Address>Springfield</Address>
+		<Age>10</Age>
+	</Item>
+</Items>
