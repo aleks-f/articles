@@ -1,8 +1,0 @@
-#
-# sample.vmsbuild
-#
-# $Id: //poco/svn/Foundation/samples/DynamicAny/DynamicAny.vmsbuild#1 $
-#
-EXE=DynamicAny
-DynamicAny
-
