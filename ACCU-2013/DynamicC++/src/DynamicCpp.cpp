@@ -35,7 +35,7 @@
 
 #include "variant.h"
 #include "TypeErasure.h"
-// folly dynamic
+#include "folly_dynamic.h"
 #include "DynamicVar.h"
 
 
@@ -49,7 +49,7 @@ const std::vector<std::string>* getVec()
 	static const char num[] = "123456789";
 	int len = 8;
 
-	StrVec* strvec = new StrVec(10000);
+	StrVec* strvec = new StrVec(1000000);
 	StrVec::iterator it = strvec->begin();
 	StrVec::iterator end = strvec->end();
 	for (; it != end; ++it)
@@ -64,16 +64,19 @@ const std::vector<std::string>* getVec()
 
 int main(int argc, char** argv)
 {
-	const StrVec* strvec3 = getVec();
-	doTypeErasure(*strvec3);
 	const StrVec* strvec1 = getVec();
+	doDynamicVar(*strvec1);
 	doVariant(*strvec1);
-	const StrVec* strvec2 = getVec();
-	doDynamicVar(*strvec2);
-
+	//const StrVec* strvec2 = getVec();
+	//const StrVec* strvec3 = getVec();
+	doTypeErasure(*strvec1);
+	//const StrVec* strvec4 = getVec();
+	doFollyDynamic(*strvec1);
+	
 	delete strvec1;
-	delete strvec2;
-	delete strvec3;
+	//delete strvec2;
+	//delete strvec3;
+	//delete strvec4;
 
 	return 0;
 }

@@ -5,6 +5,7 @@
 #include "boost/variant/variant.hpp"
 #include "boost/variant/get.hpp"
 #include <vector>
+#include <iostream>
 
 template <typename T>
 void printSize()

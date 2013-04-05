@@ -29,23 +29,17 @@ void doVariant(const std::vector<std::string>& strvec)
 	sw.start();
 	for (; it != end; ++it)
 	{
-		
 		boost::variant<int, double, std::string> u(*it);
-		//std::cout << u << std::endl;
 		
 		int i = boost::apply_visitor(string_int_converter(), u);
-		//std::cout << i << std::endl;
 	
 		double d = boost::apply_visitor(string_dbl_converter(), u);
-		//std::cout << d << std::endl;
 
 		u = i;
 		std::string s = boost::apply_visitor(num_string_converter(), u);
-		//std::cout << s << std::endl;
 
 		u = d;
 		s = boost::apply_visitor(num_string_converter(), u);
-		//std::cout << s << std::endl;
 	}
 	sw.stop();
 	std::cout << "variant: " << sw.elapsed()/1000.0 << " [ms]" << std::endl;

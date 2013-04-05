@@ -8,9 +8,13 @@
 
 include $(POCO_BASE)/build/rules/global
 
-objects = dir
+INCLUDE += -I$(POCO_BOOST_INCLUDE) -I/home/parallels/Downloads/double-conversion/src
+SYSLIBS += -lfolly
+COMMONFLAGS += -std=c++11
 
-target         = dir
+objects = DynamicCpp variant variant_visitors TypeErasure folly_dynamic DynamicVar
+
+target         = DynamicCpp
 target_version = 1
 target_libs    = PocoFoundation
 

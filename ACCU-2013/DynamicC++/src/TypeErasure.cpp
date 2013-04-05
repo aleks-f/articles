@@ -87,14 +87,4 @@ void doTypeErasure(std::vector<std::string> strvec)
 	std::cout << "boost::type_erasure: " << sw.elapsed()/1000.0 << " [ms]" << std::endl;
 	
 	std::cout << "==============" << std::endl;
-	/*
-	int i = 123;
-	std::string str;
-	any<to_string<_self, std::string>, _self&> sany(i);
-	std::cout << "sizeof string: " << sizeof(std::string) << ", type_erasure<string>: " << sizeof(sany) << std::endl;
-	std::cout << sany.to_string(str) << std::endl;
-
-	str = "321";
-	any<to_number<_self, int>, _self&> iany(str);
-	std::cout << iany.to_number(i) << std::endl;*/
 }
