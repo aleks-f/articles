@@ -13,15 +13,16 @@ using Poco::Dynamic::Var;
 
 void doVariant(const std::vector<std::string>& strvec)
 {
+	/*
 	std::cout << "boost::variant" << std::endl;
 	std::cout << "==============" << std::endl;
-
+	
 	printSize<char>();
 	printSize<int>();
 	printSize<float>();
 	printSize<double>();
 	printSize<std::string>();
-
+	*/
 	std::vector<std::string>::const_iterator it = strvec.begin();
 	std::vector<std::string>::const_iterator end = strvec.end();
 
