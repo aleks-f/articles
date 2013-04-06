@@ -1,0 +1,272 @@
+Dynamic C++
+===========
+
+Data from external sources comes in diverse types and brings along the need for datatype conversion. How can a C++ programmer accurately and efficiently transfer data from a database to XML, JSON or HTML without repeatedly stumbling over the rigid C++ static type-checking mechanism? The answer is by using type erasure techniques. Given both historical (ANSI C union and void*, MS COM Variant, boost::[variant, any, lexical_cast]) and recent (boost::type_erasure, Facebook folly::dynamic) development trends (including pending boost::any C++ standard proposal), it is obvious that there are circumstances calling for a way around the static nature of C++ language. Since the DynamicAny [ACCUDYN] article, some new solutions have appeared in the domain of type erasure and conversion, POCO [POCOPRJ] has seen several release cycles and Poco::DynamicAny is now known under a new name - Poco::Dynamic::Var. Additionally, the performance of number/string conversion has been improved by replacing sscanf/sprintf based conversion with double-conversion [DOUBCON]. In this article, the internals and externals of boost::[variant, any, type_erasure], folly::dynamic and Poco::Dynamic::Var are explored and compared. Design, capabilities, ease of use as well as pros and cons of each solution will be examined. Performance benchmark comparisons results are provided as well. 
+
+Before we proceed, a full disclosure: author of this article is also a co-author and maintainer of Poco::Dynamic::Var. A conscious effort was made to remain objective and allow the facts to speak on the merits of each solution.
+
+
+boost::any
+----------
+
+This well-known class has been around for a long time; at the time of this writing, it is an active proposal for standardization [ANYCSTD]. According to proposal authors, std::any is a container for "Discriminated types that contain values of different types but do not attempt conversion between them". This classifies any as a generic (generic in the sense of "general", not template-based) solution for the first half of the problem - how to accommodate any type in a single container. The "syntactic sugar" is waived template syntax - any itself is not a template class but it has a template constructor and assignment operator; this is conveniently used to avoid the aesthetically unpleasing angle brackets:
+
+any a = "42";
+any b(42);
+
+What happens "under the hood" is:
+
+- at compile time, assignment (or construction) code for appropriate type is generated
+- at run time, value is assigned to a polymorphic holder instantiated on the heap
+
+Any constructor is shown in Listing 1
+
+	template<typename ValueType>
+	any(const ValueType & value):content(new holder<ValueType>(value))
+        {
+        }
+
+	Listing 1
+
+Runtime dynamism is achieved through polymorphism as shown in Listing 2
+
+	class placeholder
+	{
+	public:
+		virtual ~placeholder()
+		{
+		}
+	// ...
+		virtual const std::type_info & type() const = 0;
+	// ...
+	}
+
+	template<typename ValueType>
+	class holder : public placeholder
+	{
+	public:
+		holder(const ValueType & value):held(value)
+		{
+		}
+		// ...
+		ValueType held;
+        };
+
+	Listing 2
+
+Right away, it is obvious that assignment will incur performance penalty due to heap allocation and size/performance penalty due to virtual inheritance. The convenience of any extends from the construction/assignment moment during its lifetime and stops the moment one wants to retrieve the value. Until then, any looks and acts like, well - any value. While it works in a wonderfully transparent manner on the assignment side, the data extraction side is out of any's "scope of supply". Poco::Dynamic::Var takes off where any stops, providing user-extensible conversion facilities for non pre-specialized types; the design, rationale, use and performance of this class hierarchy is described later in the article.
+
+
+Poco::Any [POCOANY] is a port of boost::any to POCO with addition of (optional) small object optimization, which prevents the runtime heap-allocation overhead for held objects under certain size. 
+
+
+
+
+boost::variant
+--------------
+
+According to the authors [BOOSVAR], boost::variant class template is "a safe, generic, stack-based discriminated union container, offering a simple solution for manipulating an object from a heterogeneous set of types in a uniform manner". It determines the needed storage at compile time, uses boost::mpl and limits the runtime capabilities to types defined at compile time.
+
+The performance penalty of boost::any creation and polymorphic nature, as well as its incapability to provide reliable compile-time type detection were the motivating factors for boost::variant authors. For that reason, variant is stack-based and provides reliable compile-time type detection and value extraction. There is a caveat - to enforce "never empty" requirement, variant may temporarily allocate storage on the heap to keep the old value for case of exception being thrown during assignment. Authors claim to have plans for alleviating this shortcoming.
+
+Faced with a boost::variant, a naïve user may try something like this:
+
+variant<int, string> v = 1;
+string s = v; // compile error
+boost::get<std::string>(v); // throws
+
+Authors admit the shortcomings and brittleness of the above approach and provide visitor pattern as a vehicle to unleash the full strength of boost::variant. The visitor is created by inheriting from boost::static_visitor<> class template:
+
+	class my_visitor : public boost::static_visitor<int>
+	{
+	public:
+    	int operator()(int i) const
+    	{ return i; }
+    
+    	int operator()(const std::string & str) const
+    	 return str.length(); }
+	};
+
+	int main()
+	{
+    	boost::variant< int, std::string > u("hello world");
+    	std::cout << u; // output: hello world
+
+    	int result = boost::apply_visitor( my_visitor(), u );
+    	std::cout << result; // output: 11 (i.e., length of "hello world")
+	}
+
+	Listing 3
+
+In order to provide the type conversions, however, user must define a visitor per destination type, e.g. to facilitate the most common conversion between numbers and strings, the following minimal set of classes is needed:
+
+	struct string_int_converter : public boost::static_visitor<int>
+	{
+		int operator()(int i) const;
+		int operator()(const std::string & str) const;
+		int operator()(double d) const;
+	};
+
+	struct string_dbl_converter : public boost::static_visitor<double>
+	{
+	// not needed ?
+		//double operator()(int i) const;
+		double operator()(const std::string & str) const;
+		double operator()(double d) const;
+	};
+
+	struct num_string_converter : public boost::static_visitor<std::string>
+	{
+		std::string operator()(int i) const;
+		std::string operator()(const std::string& str) const;
+		std::string operator()(double d) const;
+	};
+
+ 	Listing 4
+
+Internally, the variant data is in-place constructed into the storage allocated at compile time and large enough to accommodate the largest datatype specified; storage is a union of char array plus alignment padding:
+
+template <std::size_t size_, std::size_t alignment_>
+struct aligned_storage_imp
+{
+    union data_t
+    {
+        char buf[size_];
+
+        typename mpl::eval_if_c<
+              alignment_ == std::size_t(-1)
+            , mpl::identity<detail::max_align>
+            , type_with_alignment<alignment_>
+            >::type align_;
+    } data_;
+    void* address() const { return const_cast<aligned_storage_imp*>(this); }
+};
+ 
+Typically, depending on the size of the held type, there will be some extra space used (e.g. on 64-bit Win8/VS2012), variant<char> will occupy 8 bytes, while varian<std::string> will occupy 40:
+
+variant<char>: <1>8
+variant<int>: <4>8
+variant<float>: <4>8
+variant<double>: <8>16
+variant<std::string>: <32>40
+
+The most significant constraint of boost::variant is that it can only accept a predefined set of types. If a type is not explicitly listed in declaration (template instantiation) of the variant variable, that type can not be assigned to it. 
+
+
+Comparison between boost::variant and boost::any
+---
+For easier understanding of the concepts behind the two classes described so far, boost::any is often compared to "type-safe void*" whereas boost:variant is compared to "type-safe union". While there are certainly similarities, this comparison should be taken cautiously.
+
+
+Boost.Variant advantages over Boost.Any:
+
+- guarantees the type of its content is one of a finite, user-specified set of types
+- provides compile-time checked generic visitation of its content (Boost.Any provides no visitation mechanism at all; even if it did, it would need to be checked at run-time)
+- offers an efficient, stack-based storage scheme (avoiding the overhead of dynamic allocation).
+
+Boost.Any advantages over Boost.Variant:
+
+- allows any type for its content, providing great flexibility
+- provides the no-throw guarantee of exception safety for its swap operation
+- no template metaprogramming techniques (avoids potentially hard-to-read error messages and significant compile-time processor and memory demands).
+
+While variant offers slightly more cooperation on the extraction side, it is still not seamless; intuitive code won;t work while the next simplest way is brittle:
+
+
+
+boost::type_erasure
+-------------------
+
+According to the author, type_erasure addresses the shortcomings of C++ runtime polymorphism, in particular its (1) intrusiveness, (2) dynamic memory management and (3) inability to apply multiple independent concepts to a single object. Library uses some advanced constructs such as concepts and template metaprogramming constructs from boost::mpl. Just like boost::variant specifies a set of types that can be contained within it at construction time, type_erasure specifies a set of operations that can be performed on it:
+
+any<
+    mpl::vector<
+        copy_constructible<>,
+        typeid_<>,
+        incrementable<>,
+        ostreamable<>
+    >
+> x(10);
+++x; // incrementable
+std::cout << x << std::endl; // ostreamable
+
+
+folly::dynamic
+--------------
+
+The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing-like classes. The class aims to relax the static typing constraints and it is very similar to Poco::Dynamic::Var.
+
+    dynamic twelve = 12; // creates a dynamic that holds an integer
+    dynamic str = "string"; // yep, this one is an fbstring
+
+    // A few other types.
+    dynamic nul = nullptr;
+    dynamic boolean = false;
+
+    // Arrays can be initialized with brackets.
+    dynamic array = { "array ", "of ", 4, " elements" };
+    assert(array.size() == 4);
+    dynamic emptyArray = {};
+    assert(array.empty());
+
+    // Maps from dynamics to dynamics are called objects.  The
+    // dynamic::object constant is how you make an empty map from dynamics
+    // to dynamics.
+    dynamic map = dynamic::object;
+    map["something"] = 12;
+    map["another_something"] = map["something"] * 2;
+	
+    // Dynamic objects may be intialized this way
+    dynamic map2 = dynamic::object("something", 12)("another_something", 24);
+
+
+Poco::Dynamic::Var
+------------------
+
+As mentioned earlier, Poco Dynamic::Var continues where boost::any stops - on the data extraction side.
+
+
+
+In this article, we will also look at other solutions for type erasure, look at their practical uses and compare their interfaces and implementations.
+
+
+Type safety is an important feature of C++; type erasure is a necessary technique for modern software development. Session examines and compares existing solutions to these important concerns.
+
+
+
+[POCOPRJ] C++ Portable Components, http://pocoproject.org
+
+[ACCUDYN] "DynamicAny", Part I and II, Alex Fabijanic, Overload August/October 2008
+          http://accu.org/index.php/journals/1502
+          http://accu.org/index.php/journals/1511
+
+[DOUBCON] "Double-conversion library", http://code.google.com/p/double-conversion/
+
+[BOOSANY] Boost.Any, http://www.boost.org/doc/libs/1_53_0/doc/html/any.html
+
+[POCOANY] Poco::Anypocoproject.org
+
+
+[ANYCSTD] "Any Library Proposal", Revision 1, Kevlin Henney, Beman Dawes
+          http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3390.html
+
+[BOOSVAR] "Boost.Variant", Eric Friedman, Itay Maman
+          http://www.boost.org/doc/libs/1_52_0/doc/html/variant.html
+
+[FOLLYDY] Facebook folly dynamic class
+          https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md
+
+
+Roughly , the landscape looks like this:
+
+- folly::dynamic (https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md) inherits (privately) from boost::operators and accommodates different types in a union. 
+
+- 
+
+- I do not know enough about boost::type_erasure; if I get it right, it extends boost::any by adding dynamic operations on types, but it does not provide built-in conversion for values; according to Dave Abrahams (during std::any discussion in Portland) it's a combination of boost::any and boost::function
+	
+- boost::lexical_cast provides conversion between strings and numbers; it uses std iostreams (poor performance)
+
+- Poco::Dynamic::Var (previously called Poco::DynamicAny) (https://github.com/pocoproject/poco/tree/master/Foundation/include/Poco/Dynamic) is essentially identical to boost::any (although, there is a separate and independent Poco::Any class) on data "receiving" side; with addition of built-in conversions and operators (through placeholder virtual functions) on the "giving" side.
+
+See also C# dynamic: http://msdn.microsoft.com/en-us/library/dd264736.aspx
