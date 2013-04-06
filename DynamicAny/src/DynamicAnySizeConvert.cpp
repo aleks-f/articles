@@ -35,4 +35,4 @@
 #include <string>
 
 static Poco::DynamicAny dac = 1;
-static std::string dai = dac;
+static std::string dai = dac.toString();

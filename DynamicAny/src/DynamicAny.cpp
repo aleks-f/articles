@@ -78,7 +78,7 @@ void anyCastPtrString(std::string& s, Any& as);
 void extractString(std::string& s, DynamicAny& ds);
 
 
-Poco::FileOutputStream fos("C:\\DynamicAny.csv");
+Poco::FileOutputStream fos("DynamicAny.csv");
 
 
 void print(const std::string& name, Poco::Timestamp::TimeDiff time)
@@ -111,7 +111,7 @@ void listingThree()
 	int i = any;
 	assert (i == 42);
 	any = 65536;
-	std::string s = any;
+	std::string s = any.toString();
 	assert (s == "65536");
 	try 
 	{
@@ -158,7 +158,7 @@ void listingFive()
 void listingSix()
 {
 	DynamicAny any("42");
-	std::string s1 = any; //OK
+	std::string s1 = any.toString(); //OK
 	//std::string s2(any); //compile error
 	std::string s3(any.convert<std::string>()); //OK
 }
@@ -168,7 +168,7 @@ void doUDT()
 {
 	SSN udt1(123456789);
 	DynamicAny da = udt1;
-	std::string ssn = da;
+	std::string ssn = da.toString();
 	int i = da;
 	std::cout << ssn << std::endl;
 	SSN udt2 = da;
@@ -332,7 +332,7 @@ void doPerformance(int count)
 	fos.close();
 }
 
-
+#include "Poco/Dynamic/Struct.h"
 int main(int argc, char** argv)
 {
 	checkListings();

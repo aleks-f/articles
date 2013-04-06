@@ -14,6 +14,7 @@
 
 using Poco::NumberFormatter;
 using Poco::DynamicAny;
+using namespace Poco::Dynamic;
 
 
 class SSN
@@ -62,14 +63,14 @@ namespace Poco {
 
 
 template <>
-class DynamicAnyHolderImpl<SSN>: public DynamicAnyHolder
+class VarHolderImpl<SSN>: public VarHolder
 {
 public:
-	DynamicAnyHolderImpl(const SSN& val): _val(val)
+	VarHolderImpl(const SSN& val): _val(val)
 	{
 	}
 
-	~DynamicAnyHolderImpl()
+	~VarHolderImpl()
 	{
 	}
 	
@@ -88,9 +89,9 @@ public:
 		val = _val.sSSN();
 	}
 
-	DynamicAnyHolder* clone() const
+	VarHolder* clone(Placeholder<VarHolder>* pVarHolder = 0) const
 	{
-		return new DynamicAnyHolderImpl(_val);
+		return cloneHolder(pVarHolder, _val);
 	}
 	
 	const SSN& value() const
@@ -99,7 +100,7 @@ public:
 	}
 
 private:
-	DynamicAnyHolderImpl();
+	VarHolderImpl();
 	SSN _val;
 };
 
