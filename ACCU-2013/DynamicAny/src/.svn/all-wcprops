@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/poco/!svn/ver/656/poco/articles/DynamicAny/src
+END
+UDT.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/poco/!svn/ver/652/poco/articles/DynamicAny/src/UDT.h
+END
+AnySize.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/poco/!svn/ver/655/poco/articles/DynamicAny/src/AnySize.cpp
+END
+DynamicAnySizeExtract.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svnroot/poco/!svn/ver/654/poco/articles/DynamicAny/src/DynamicAnySizeExtract.cpp
+END
+ConversionCalls.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svnroot/poco/!svn/ver/569/poco/articles/DynamicAny/src/ConversionCalls.cpp
+END
+lexical_cast_size.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/poco/!svn/ver/656/poco/articles/DynamicAny/src/lexical_cast_size.cpp
+END
+DynamicAnySizeConvert.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svnroot/poco/!svn/ver/656/poco/articles/DynamicAny/src/DynamicAnySizeConvert.cpp
+END
+DynamicAny.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/poco/!svn/ver/653/poco/articles/DynamicAny/src/DynamicAny.cpp
+END
