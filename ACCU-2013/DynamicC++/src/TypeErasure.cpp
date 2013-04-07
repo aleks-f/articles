@@ -8,6 +8,14 @@
 #include <boost/type_erasure/any.hpp>
 #include <boost/type_erasure/concept_interface.hpp>
 #include <boost/type_erasure/rebind_any.hpp>
+/************/
+#include <boost/type_erasure/any.hpp>
+#include <boost/type_erasure/any_cast.hpp>
+#include <boost/type_erasure/builtin.hpp>
+#include <boost/type_erasure/operators.hpp>
+#include <boost/type_erasure/tuple.hpp>
+#include <boost/mpl/vector.hpp>
+/************/
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -23,7 +31,7 @@ struct to_string
 {
 	static T apply(const F& from, T& to)
 	{
-		return NumberFormatter::format(from);
+		return to = NumberFormatter::format(from);
 	}
 };
 
@@ -32,7 +40,7 @@ struct to_number
 {
 	static T apply(const F& from, T& to)
 	{
-		return NumberParser::parse(from);
+		return to = NumberParser::parse(from);
 	}
 };
 
@@ -43,7 +51,8 @@ namespace boost
 		template<class C, class T, class Base>
 		struct concept_interface< ::to_string<C, T>, Base, C> : Base
 		{
-			T to_string(typename rebind_any<Base, T&>::type arg)
+			typedef typename rebind_any<Base, T>::type IntType;
+			T to_string(IntType arg = IntType())
 			{
 				return call(::to_string<C, T>(), *this, arg);
 			}
@@ -52,7 +61,8 @@ namespace boost
 		template<class C, class T, class Base>
 		struct concept_interface< ::to_number<C, T>, Base, C> : Base
 		{
-			T to_number(typename rebind_any<Base, T&>::type arg)
+			typedef typename rebind_any<Base, T&>::type StringType;
+			T to_number(StringType arg = StringType())
 			{
 				return call(::to_number<C, T>(), *this, arg);
 			}
@@ -62,8 +72,67 @@ namespace boost
 
 
 
+void typeErasureTutorial()
+{
+	/*
+	typedef any<
+		boost::mpl::vector<
+			copy_constructible<>,
+			typeid_<>,
+			addable<>,
+			ostreamable<>
+		>
+	> any_type;
+	any_type x(1.1);
+	any_type y(1);
+	any_type z(x + y);
+	std::cout << z << std::endl; // prints ???
+	*/
+	/*
+	double d = 1.1;
+	int i = 1;
+
+	typedef boost::mpl::vector<
+		copy_constructible<_a>,
+		copy_constructible<_b>,
+		typeid_<_a>,
+		addable<_a, _b, _a>
+	> requirements;
+
+	tuple<requirements, _a, _b> t(d, i);
+	any<requirements, _a> x(get<0>(t) + get<1>(t));
+	std::cout << any_cast<double>(x) << std::endl; // 2.1
+	std::cout << any_cast<int>(x) << std::endl; // 2.1
+	*/
+	/*
+	double d = 1.1;
+	int i = 1;
+
+	typedef boost::mpl::vector<
+		copy_constructible<_a>,
+		copy_constructible<_b>,
+		typeid_<_a>,
+		addable<_a, _b, _a>,
+		ostreamable<>
+	> requirements;
+
+	tuple<requirements, _a, _b> t(&d, 1.1);
+	//any<requirements, _a> x(get<0>(t) + get<1>(t));
+	*/
+	//std::cout << any_cast<double>(x) << std::endl; // compile error
+
+	int j = 123;
+	any<to_string<_self, std::string>, _self&> ai(j);
+	std::string str = ai.to_string();
+	std::cout << str << std::endl;
+
+}
+
+
 void doTypeErasure(std::vector<std::string> strvec) 
 {
+	
+
 	std::cout << "boost::type_erasure" << std::endl;
 	std::cout << "==============" << std::endl;
 

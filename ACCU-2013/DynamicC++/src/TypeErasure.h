@@ -5,5 +5,6 @@
 #include <string>
 
 void doTypeErasure(std::vector<std::string>);
+void typeErasureTutorial();
 
 #endif // DynamicCPP_TypeErasure_included

@@ -69,12 +69,14 @@ int main(int argc, char** argv)
 {
 	StrVecPtr strvec1 = getVec();
 
-	doDynamicVar(*strvec1);
-	doVariant(*strvec1);
-	doTypeErasure(*strvec1);
+	//doDynamicVar(*strvec1);
+	//doVariant(*strvec1);
+	//doTypeErasure(*strvec1);
 #ifndef _WIN32
 	doFollyDynamic(*strvec1);
 #endif
+
+	typeErasureTutorial();
 
 	return 0;
 }

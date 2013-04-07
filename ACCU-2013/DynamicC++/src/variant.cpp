@@ -10,9 +10,16 @@ using boost::variant;
 using Poco::Stopwatch;
 using Poco::Dynamic::Var;
 
+class MyObj
+{
+	char c [100000];
+};
 
 void doVariant(const std::vector<std::string>& strvec)
 {
+	MyObj o;
+	std::cout << sizeof(o) << std::endl;
+	boost::variant<int, MyObj> u(o);
 	/*
 	std::cout << "boost::variant" << std::endl;
 	std::cout << "==============" << std::endl;

@@ -3,16 +3,15 @@
 
 
 #include "boost/variant/variant.hpp"
-#include "boost/variant/get.hpp"
 #include <vector>
-#include <iostream>
+//#include <iostream>
 
 template <typename T>
 void printSize()
 {
 	boost::variant<T> v;
 	std::string name(typeid(T).name());
-	std::cout << "sizeof " << name << ": " << sizeof(T) << ", variant<"  << name << ">: " << sizeof(boost::variant<T>) << std::endl;
+	//std::cout << "sizeof " << name << ": " << sizeof(T) << ", variant<"  << name << ">: " << sizeof(boost::variant<T>) << std::endl;
 }
 
 void doVariant(const std::vector<std::string>&);
