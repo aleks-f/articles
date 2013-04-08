@@ -1,10 +1,31 @@
 Dynamic C++
 ===========
 
-Data from external sources comes in diverse types and brings along the need for datatype conversion. How can a C++ programmer accurately and efficiently transfer data from a database to XML, JSON or HTML without repeatedly stumbling over the rigid C++ static type-checking mechanism? The answer is by using type erasure techniques. Given both historical (ANSI C union and void*, MS COM Variant, boost::[variant, any, lexical_cast]) and recent (boost::type_erasure, Facebook folly::dynamic) development trends (including pending boost::any C++ standard proposal), it is obvious that there are circumstances calling for a way around the static nature of C++ language. Since the DynamicAny [ACCUDYN] article, some new solutions have appeared in the domain of type erasure and conversion, POCO [POCOPRJ] has seen several release cycles and Poco::DynamicAny is now known under a new name - Poco::Dynamic::Var. Additionally, the performance of number/string conversion has been improved by replacing sscanf/sprintf based conversion with double-conversion [DOUBCON]. In this article, the internals and externals of boost::[variant, any, type_erasure], folly::dynamic and Poco::Dynamic::Var are explored and compared. Design, capabilities, ease of use as well as pros and cons of each solution will be examined. Performance benchmark comparisons results are provided as well. 
+Introduction
+------------
 
-Before we proceed, a full disclosure: author of this article is also a co-author and maintainer of Poco::Dynamic::Var. A conscious effort was made to remain objective and allow the facts to speak on the merits of each solution.
+Data from external sources comes in diverse types and brings along the need for datatype conversion. How can a C++ programmer accurately and efficiently transfer data from a database to XML, JSON or HTML without repeatedly stumbling over the rigid C++ static type-checking mechanism? The answer is by using type erasure techniques. Given both historical (ANSI C union and void*, MS COM Variant, boost::[variant, any, lexical_cast]) and recent (boost::type_erasure, Facebook folly::dynamic) development trends (including pending boost::any C++ standard proposal), it is obvious that there are circumstances calling for a way around the static nature of C++ language. Since the DynamicAny [ACCUDYN] article, some new solutions have appeared in the domain of type erasure and conversion, POCO [POCOPRJ] has seen several release cycles and Poco::DynamicAny is now known under a new name - Poco::Dynamic::Var. Additionally, the performance of number/string conversion has been improved by replacing sscanf/sprintf based conversion with double-conversion [DOUBCON]. In this article, the internals and externals of boost::[any, variant, type_erasure], folly::dynamic and Poco::Dynamic::Var are explored and compared. Design, capabilities, ease of use as well as pros and cons of each solution will be examined. Performance benchmark comparisons results are provided as well. 
 
+Before we proceed, a full disclosure: author is also a co-author and maintainer of Poco::Dynamic::Var. A conscious effort was made to remain objective and allow the facts to speak on the merits of each solution.
+
+The Problem Domain
+------------------
+
+Data types differ; most of the data types is known to the programmer at compile time. As the software engineering trade adn user expectations advance, however, more and more we face the scenarios (interacting with heterogeneous data sources and formatting data for a variety of consumers) where data types dealt with are not known in advance. 
+
+From the data type dynamism implementation standpoint, there are three main concerns to address
+
+- storing the data
+- performing operations (including conversions) on data
+- retrieving data
+
+Addditionally, in regards to the above aspects, the following concerns emerge:
+
+- runtime performance in terms of (a) speed and (b) memory usage
+- code size
+- ease of use
+
+Since the type information provided at runtime (RTTI) by the C++ programming language is very limited, various solutions to deal with type diversity have emerged. This article compares several solutions from the standpoint of the above list of concerns.
 
 boost::any
 ----------

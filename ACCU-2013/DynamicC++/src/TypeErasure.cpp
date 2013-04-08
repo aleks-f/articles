@@ -14,6 +14,7 @@
 #include <boost/type_erasure/builtin.hpp>
 #include <boost/type_erasure/operators.hpp>
 #include <boost/type_erasure/tuple.hpp>
+#include <boost/type_erasure/relaxed_match.hpp>
 #include <boost/mpl/vector.hpp>
 /************/
 #include <iostream>
@@ -61,7 +62,7 @@ namespace boost
 		template<class C, class T, class Base>
 		struct concept_interface< ::to_number<C, T>, Base, C> : Base
 		{
-			typedef typename rebind_any<Base, T&>::type StringType;
+			typedef typename rebind_any<Base, T>::type StringType;
 			T to_number(StringType arg = StringType())
 			{
 				return call(::to_number<C, T>(), *this, arg);
@@ -74,20 +75,20 @@ namespace boost
 
 void typeErasureTutorial()
 {
-	/*
 	typedef any<
 		boost::mpl::vector<
 			copy_constructible<>,
 			typeid_<>,
 			addable<>,
-			ostreamable<>
+			ostreamable<>,
+			relaxed_match
 		>
 	> any_type;
 	any_type x(1.1);
 	any_type y(1);
 	any_type z(x + y);
-	std::cout << z << std::endl; // prints ???
-	*/
+	std::cout << (x + y) << std::endl; // prints ???
+	
 	/*
 	double d = 1.1;
 	int i = 1;
@@ -144,13 +145,13 @@ void doTypeErasure(std::vector<std::string> strvec)
 	for (; it != end; ++it)
 	{
 		any<to_number<_self, int>, _self&> ais(*it);
-		int i = ais.to_number(i);
+		int i = ais.to_number();
 		any<to_number<_self, double>, _self&> ads(*it);
-		double d = ads.to_number(d);
+		double d = ads.to_number();
 		any<to_string<_self, std::string>, _self&> sai(i);
-		*it = sai.to_string(*it);
+		*it = sai.to_string();
 		any<to_string<_self, std::string>, _self&> sad(d);
-		*it = sad.to_string(*it);
+		*it = sad.to_string();
 	}
 	sw.stop();
 	std::cout << "boost::type_erasure: " << sw.elapsed()/1000.0 << " [ms]" << std::endl;

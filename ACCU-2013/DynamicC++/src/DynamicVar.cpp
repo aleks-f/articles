@@ -35,7 +35,7 @@ void doDynamicVar(const std::vector<std::string>& strvec)
 		double d = var;
 
 		var = i;
-		std::string s = var.toString();
+		std::string s = var;
 
 		var = d;
 		s = var.toString();
