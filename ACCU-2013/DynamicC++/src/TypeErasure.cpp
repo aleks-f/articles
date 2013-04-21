@@ -80,8 +80,8 @@ void typeErasureTutorial()
 			copy_constructible<>,
 			typeid_<>,
 			addable<>,
-			ostreamable<>,
-			relaxed_match
+			ostreamable<>
+			//,relaxed_match
 		>
 	> any_type;
 	any_type x(1.1);

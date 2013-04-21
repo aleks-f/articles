@@ -11,6 +11,15 @@ using Poco::Dynamic::Var;
 
 void doDynamicVar(const std::vector<std::string>& strvec)
 {
+	std::string str("42");
+	Var v1 = str; // "42"
+	int i = v1; // 42
+	v1 = i; // 42
+	++v1; // 43 
+	double d = v1; // 43.0
+	Var v2 = d + 1.0; // 44.0
+	float f = v2 + 1; // 45.0
+
 	/*
 	std::cout << "Poco::Dynamic::Var" << std::endl;
 	std::cout << "==============" << std::endl;
@@ -35,7 +44,7 @@ void doDynamicVar(const std::vector<std::string>& strvec)
 		double d = var;
 
 		var = i;
-		std::string s = var;
+		std::string s = var.toString();
 
 		var = d;
 		s = var.toString();

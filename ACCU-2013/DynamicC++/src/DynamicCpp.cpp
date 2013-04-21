@@ -40,9 +40,14 @@
 #include "folly_dynamic.h"
 #endif
 #include "Poco/SharedPtr.h"
+#include "boost/any.hpp"
+
 
 using Poco::Dynamic::Var;
 using boost::variant;
+using boost::any;
+using boost::any_cast;
+
 
 typedef std::vector<std::string> StrVec;
 typedef Poco::SharedPtr<std::vector<std::string>> StrVecPtr;
@@ -65,6 +70,44 @@ const StrVecPtr getVec()
 }
 
 
+void demoAny()
+{
+	any a;
+
+	any c(42);
+
+	any b = std::string("42");
+
+	any d;
+
+	d = b;
+
+	std::cout << any_cast<std::string>(d) << std::endl;
+}
+
+void demoVariant()
+{/*
+	boost::variant<int, std::string> v;
+
+	v = "hello";
+
+	std::cout << v << std::endl; // "hello"
+
+	std::string& str = boost::get<std::string>(v);
+
+	str += " world! "; // "hello world!"
+*/
+	boost::variant<short, std::string> v(123);
+
+	//std::string s = boost::get<std::string>(v); // throws
+
+	//int i = v; // compile error
+
+	//int i = boost::get<int>(v); // throws!
+
+	int i = boost::get<short>(v); // OK
+}
+
 int main(int argc, char** argv)
 {
 	StrVecPtr strvec1 = getVec();
@@ -77,6 +120,8 @@ int main(int argc, char** argv)
 #endif
 
 	typeErasureTutorial();
+	//demoAny();
+	//demoVariant();
 
 	return 0;
 }

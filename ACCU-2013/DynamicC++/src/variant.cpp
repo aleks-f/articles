@@ -15,11 +15,14 @@ class MyObj
 	char c [100000];
 };
 
+class MyObj2 {};
+
 void doVariant(const std::vector<std::string>& strvec)
 {
 	MyObj o;
+
 	std::cout << sizeof(o) << std::endl;
-	boost::variant<int, MyObj> u(o);
+	boost::variant<std::string, double> u(1.1);
 	/*
 	std::cout << "boost::variant" << std::endl;
 	std::cout << "==============" << std::endl;
