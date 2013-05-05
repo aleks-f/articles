@@ -1,0 +1,1292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.8" />
+<title><code>Dynamic C++</code></title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install(2);
+/*]]>*/
+</script>
+</head>
+<body class="article">
+<div id="header">
+<h1><code>Dynamic C++</code></h1>
+<span id="author">Alex Fabijanic</span><br />
+<span id="email"><code>&lt;<a href="mailto:alex@pocoproject.org">alex@pocoproject.org</a>&gt;</code></span><br />
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock">
+<div class="content">As to which is more important, Dynamic or static, both are absolutely essential, even when they are in conflict.</div>
+<div class="attribution">
+<em>Metaphysics of Quality</em><br />
+&#8212; Robert Pirsig
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>C++ is statically-typed language. The static nature of the C++ type system provides the data integrity "safety net". Compiler is an indispensable runtime-surprise-prevention tool and the static nature of C++ provides runtime performance gain. Before we go any further, let&#8217;s clarify the nomenclature - static typing here should not be confused with its close relative strong-typing, see <a href="#NOTSTDY">[NOTSTDY]</a> for details. It is precisely the &#8220;weakness&#8221; of the type system (in combination with polymorphism and templates) that provides functinality needed for dynamic-like behavior within a statically typed language such as C++. And there are circumstances calling for a &#8220;softened&#8221; type system, where a degree of performance sacrifice is acceptable and runtime type system relaxation desirable (or even necessary). To provide generic functionality automatically adaptable to different data types at runtime within the confines of standard C++, the runtime type detection system does not suffice - one has to resort to library solutions based on various techniques described later.</p></div>
+<div class="paragraph"><p>Data from external data sources arrives in a variety of types and brings along the need for efficient and transparent datatype conversion. The proliferation of web-based interfaces and databases with addition of popular textual formats such as JSON and XML exacerbates the need for relaxed type system with transparent and safe conversion facilities. This is a domain where dynamic languages have gained a significant footing. In order to clarify the premises for this writing, we must take a brief detour here &#8230;</p></div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Detour</div>
+<div class="paragraph"><p>To get a broader perspective, let&#8217;s look at the need for and benefits of &#8220;dynamic&#8221; typing in C++. Even the dynamic language environments are ultimately built on a statically typed foundation. Yet, when the static/dynamic langugage interaction need arises, we embed those &#8220;foreign&#8221; language environments and we must sepak to them in a &#8220;foreign tongue&#8221; (i.e. through a specialized translation layer). Wouldn&#8217;t it be nice to (a) smoothen the rough edge between the two in a reusable way, while also (b) addressing the concern of dealing with external data of different types and (c) gain a generic-purpose standard C++ &#8220;dynamic&#8221; environment natively and seamlessly, as a side-efect? While standard C++ claims to be a general-purpose language, it stops abruptly at the point where (among other things) dynamic-language-like behavior is needed - as things stand at the time of this writing, even a well-known, half-way-there oldie like <code>boost::any</code> could only make it to 2014 TS, which means it will not be standardized earlier than 2017. The original spark (<code>boost::any</code> port to POCO some years ago) triggering this systematic overview was decidedly not about C++ as a &#8220;dynamic&#8221; language but rather about a way to work around the rigidly static C++ type system in a reasonably efficient and reusable way - through a library solution. But libraries are languages, so the C++ library solutions for type dynamics are C++'s native &#8220;dynamic&#8221; languages of sorts. Although the underlying types are still statically defined, due to the weakness of C++ type system, they can be dynamically held; and one can coax them to be readily available at runtime, holding values of different types, that they very much &#8220;quack and walk&#8221; as a dynamic language&#8230; Suddenly, the idea of a native C++ &#8220;dynamic language&#8221; does not sound so outlandish &#8230;</p></div>
+</div></div>
+<div class="paragraph"><p>So, back on track - is it possible to provide dynamic-like behavior within the constraints of standard ANSI/ISO C++? How can a C++ programmer accurately and efficiently transfer data from a database to XML, JSON or HTML without stumbling over the rigid C++ static type-checking mechanism at compile time while ensuring accuracy at runtime? Can type-erasure and (checked) type-conversion techniques fit the bill? Given both historical (ANSI C union and void*, MS COM Variant, boost::[variant, any, lexical_cast], Qt QVariant, adobe::any_regular) and recent (Boost.TypeErasure, Facebook folly::dynamic) development trends (including pending Boost.Any C++ standard proposal), the need for a way around the static nature of C++ language is obvious. Since the DynamicAny <a href="#ACCUDYN">[ACCUDYN]</a> article, some new solutions <a href="#FOLLYDY">[FOLLYDY]</a> have appeared, POCO <a href="#POCOPRJ">[POCOPRJ]</a> has seen several release cycles and <code>Poco::DynamicAny</code> is now known under a new name - <code>Poco::Dynamic::Var</code>. Additionally, the performance and type-safety of number/string conversion has been improved by replacing sscanf/sprintf-based conversion with double-conversion <a href="#DOUBCON">[DOUBCON]</a> (also used by <code>folly::dynamic</code>). In this article series, both externals and internals of boost::[variant, any, type_erasure], folly::dynamic, Poco::Dynamic::Var, Qt QVariant and adobe::any_regular are explored and compared. Design, capabilities, ease of use as well as pros and cons of each solution will be examined. Performance benchmark comparisons results will be provided as well.</p></div>
+<div class="paragraph"><p>We will start our journey through Dynamic C++ world with a smooth sail - simple, minimalistic and well-known <code>boost::any</code>, a bipolar class with deceptively soft, entirely type-agnostic conception and surprisingly rigid, ultra-strongly typed delivery interface (or, should we say, lack thereof). As we move on, the journey takes us to rough waters of solutions that endeavor, each in its own way, to provide dynamic facilities within the confines of standard C++ and its static type system. The solutions gradually build on existing foundations, attacking the problem from various aspects while trying to keep size, performance and datatype integrity under control.</p></div>
+<div class="paragraph"><p>But, first things first - let us start by looking at concerns shaping the solutions and ingredients they&#8217;re made of.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_dynamic_concerns">2. Dynamic Concerns</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>What are the concerns involved with dynamic behavior and how are they solved? Let&#8217;s enumerate, disect and analyze them &#8230;</p></div>
+<div class="dlist"><div class="title">Concerns</div><dl>
+<dt class="hdlist1">
+Storing Value
+</dt>
+<dd>
+<p>
+This concern has to do with the location where the actual bits representing the value reside. Within C++ memory model, there are two distinct choices - heap and stack - and a hybrid between the two. More on this in Data Storage paragraph later. There are various memory allocation optimization methods that look just like heap allocation  from programmer&#8217;s standpoint but actually allocate from different places; such constructs are beyond the scope of this article.
+</p>
+</dd>
+<dt class="hdlist1">
+Performing Operations
+</dt>
+<dd>
+<p>
+Most frequently encountered operations are type conversions, between string and numeric or other values. Furthermore, there&#8217;s assignment and arithmetic, logical operators. There are other language operations such as e.g. bitwise but those are not of concern for this article&#8217;s theme. Finally, there are various conversions or transformations; as we will see later, some solutions even provide capability to add custom operations to types at compile time.
+</p>
+</dd>
+<dt class="hdlist1">
+Retrieving Value
+</dt>
+<dd>
+<p>
+Value retrieval ranges from a strict requirement for explicit held type to transparent conversion between different types, sometimes with runtime exceptions thrown if conversion is impossible; with some solutions, it is very easy to venture into undefined behavior if user is not careful. Sometimes, built-in value retrieval is readily available, while in some cases the user is required to use existing or provide custom external "scaffolding" in order to extract the held value.
+</p>
+</dd>
+<dt class="hdlist1">
+Runtime Performance
+</dt>
+<dd>
+<p>
+From the runtime performance standpoint, there will typically be two concerns: heap memory allocation and conversion/transformation costs. From this aspect, anything that could be done at compile time, should. Additionally, as mentioned above, small object optimization affects runtime performance in both ways - positively when heap allocation is avoided and negatively every time value is retrieved.
+</p>
+</dd>
+<dt class="hdlist1">
+Memory Usage
+</dt>
+<dd>
+<p>
+Memory usage will vary, from the exact type size (plus platform-dependent alignment, if applicable) to a fixed size, large enough to hold the largest stack-based type supported.
+</p>
+</dd>
+<dt class="hdlist1">
+Code Size
+</dt>
+<dd>
+<p>
+The binary code size generated by various solutions will mostly be proportional to the functionality provided. For example, boost::any code will be small due to non-existent conversion logic. Poco::Dynamic::Var code will be the largest, due to exhaustive involvement in type conversions and accuracy checks. The rest of the solutions are somewhere in between.
+</p>
+</dd>
+<dt class="hdlist1">
+Ease of Use
+</dt>
+<dd>
+<p>
+Last but not least, this concern regards user experience when dealing with dynamic functionality. Some solutions have rigid compile-time constraints, while some others may exhibit surprising runtime behavior. If user, in order to use a software component correctly, has to understand its implementation details, the total value of the abstraction is diminished regardless of the implementation quality. Or, as Scott Meyers succintly puts it, &#8220;Make interfaces easy to use correctly and hard to use incorrectly&#8221;.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_storage">3. Data Storage</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>If the value  resides on the heap, we will pay in runtime performance for memory allocation. However, the amount of memory will be variable, commensurate with the size of held type plus platform-dependent padding/alignment. If value resides on the stack, we will invariably pay the storage size of the largest value we wish to store. And then, there is a hybrid solution (also known as small object optimization, configurable at compile time) which, to an extent, compromises the stack size concern in order to avoid the heap allocation penalty for types under certain size; this solution, however, imposes runtime penalties of size inspection (a) before instantiation and (b) at every value retrieval.</p></div>
+<div class="sect2">
+<h3 id="_heap">3.1. Heap</h3>
+<div class="dlist"><div class="title">Options</div><dl>
+<dt class="hdlist1">
+<em>void*</em> and <em>operator new</em>
+</dt>
+<dd>
+<p>
+This technique provides dynamic-like behavior by virtue of <em>void*</em>, a C language construct allowing pointers to unknown types. The default <em>operator new</em> allocates memory on the heap. Due to type-independent nature of <em>void*</em>, newly created entity can be of any type, so the <em>new operator</em> can construct whatever the type needed in the allocated memory; note the difference in word order - <em>new operator</em> first calls <em>operator new</em> and, after the memory is allocated, constructs the object. From that point on, it is up to the &#8220;dynamic&#8221; solution and programmer to ensure the newly created type value is properly treated. There are some variations on this theme in later described solutions and we will examine them in their due time.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><div class="title">Concerns</div><dl>
+<dt class="hdlist1">
+Allocation Overhead
+</dt>
+<dd>
+<p>
+Memory allocation on the heap can be an expensive runtime operation; for optimization purposes, language allows overloading of the <em>operator new</em>. This allows for various schemes of memory (pre)allocation that alleviate the performance hit imposed by default <em>operator new</em>.
+</p>
+</dd>
+<dt class="hdlist1">
+Memory Cleanup
+</dt>
+<dd>
+<p>
+Memory that was allocated on the heap by <em>new</em> must be released with <em>delete</em>.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_stack">3.2. Stack</h3>
+<div class="paragraph"><div class="title">Options</div><p><em>union</em> + placement <em>new</em></p></div>
+<div class="paragraph"><p>This technique utilizes the C-language <em>union</em> facility in combination with placement <em>new</em>. Unlike <em>struct</em>, whose members are laid out in memory next to each other, <em>union</em> can only hold one value at a time because internally, <em>union</em> data members overlap. This <em>union</em> feature provides the same storage location for different types - a feature that can be exploited for dynamic-type-like behavior at runtime without paying the full sum-of-storage price for all the types supported. In these scenarios, placement <em>new</em> is typically used, which does not allocate memory but only constructs object in pre-allocated storage. This usually happens on the stack.</p></div>
+<div class="dlist"><div class="title">Concerns</div><dl>
+<dt class="hdlist1">
+Size
+</dt>
+<dd>
+<p>
+Since <em>union</em> must accomodate the largest type supported, it has to occupy at least the largest type size.
+</p>
+</dd>
+<dt class="hdlist1">
+Alignment
+</dt>
+<dd>
+<p>
+In practice, the amount of space needed is often more than largest <em>union</em> member size due to platform-dependent alignment requirements. This means that, if only smaller types are used, sometimes there may be some space not effectively used but consumed nevertheless. Alignment requirements and details are beyond the scope of this writing.
+</p>
+</dd>
+<dt class="hdlist1">
+Destruction
+</dt>
+<dd>
+<p>
+Since object is constructed in pre-allocated storage, there is no need to explicitly call <em>delete</em>. This, however, means that the destructor has to be called explicitly by the programmer.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_hybrid">3.3. Hybrid</h3>
+<div class="dlist"><div class="title">Options</div><dl>
+<dt class="hdlist1">
+Small Object Optimization
+</dt>
+<dd>
+<p>
+This is a combined technique of heap- and stack-based storage strategies. Programmer decides and specifies at compile time the limit in object size that should be created on the stack. At runtime, based on the compile-time value, the decision is made whether the new object will be constructed on the stack or the storage for it to be constructed will be allocated on the heap.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><div class="title">Concerns</div><dl>
+<dt class="hdlist1">
+Runtime Detection Performance
+</dt>
+<dd>
+<p>
+Obviously, every creation and retrieval of the value will incur the penalty of the value location detection. There are additional difficulties with assignment and swap operations as well as with the exception safety.
+</p>
+</dd>
+<dt class="hdlist1">
+Stack Use
+</dt>
+<dd>
+<p>
+The fixed stack space is used indiscriminately, even when the value is allocated on the heap (in which case, the stack space usually serves as the pointer storage).
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_operations">4. Operations</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Type Conversions
+</dt>
+<dd>
+<p>
+Type conversions are most frequently encountered operations, the most frequent conversions being those between numbers and strigs. Conversions between compatible types (e.g. short to int) can be performed statically. If static conversion is not possible, then dynamic functionality must take its place; this typically involves parsing a string to generate a corresponding number or vice-versa - formatting a number into string. Not all solutions described here are equally cooperative in this area; they range from those not providing any (no pun intended) conversions, over those providing accompanying mechanisms for defining conversion facilities to those providing built-in conversions.
+</p>
+</dd>
+<dt class="hdlist1">
+Standard Language Operations (+, -, ==, &#8230;)
+</dt>
+<dd>
+<p>
+These operations are indispensible for built-in types. They can also be brittle due to many runtime cases where they may make no sense for the held types/values. The choice, therefore, is to either not provide them at all or provide them and throw exception at runtime if the attempted operation makes no sense for the current values. The latter behavior is consistent with the way a dynamic language would behave.
+</p>
+</dd>
+<dt class="hdlist1">
+Custom Operations
+</dt>
+<dd>
+<p>
+This is an area where things get really complicated - &#8220;dynamically&#8221; attaching operations to types that do not &#8220;natively&#8221; support them. There are some solutions that provide this functionality. There are aslo some pitfalls thereof. These will be analyzed and discussed later, in the context of said solutions presentation.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ingredients">5. Ingredients</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The &#8220;ingredients&#8221; for the dynamic functionality within C++ &#8220;recipe&#8221; are summarized in the following list:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+new
+</p>
+</li>
+<li>
+<p>
+placement new
+</p>
+</li>
+<li>
+<p>
+void*
+</p>
+</li>
+<li>
+<p>
+union
+</p>
+</li>
+<li>
+<p>
+virtual functions
+</p>
+</li>
+<li>
+<p>
+templates
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>From the entities listed above, we already discussed <em>new</em> and <em>union</em>; the ones that were not touched on so far are virtual functions and templates.</p></div>
+<div class="paragraph"><p><strong>Virtual functions</strong> are, of course, an indispensable mechanism for runtime polymorphism, providing objects with identical interface that behave differently. They help tremendously in defining conversions and other operations, where it is very convenient to provide default behavior (often throwing exception) in parent class and appropriately define it in descendants. Virtual functions inflict both size and performance penalty.</p></div>
+<div class="paragraph"><p><strong>Templates</strong> are another powerful C++ mechanism providing compile-time genericity. When combined with other facilities described here, templates can produce very powerful (but often complicated as well) programming constructs.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_boost_any">6. Boost.Any</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This well-known class has been around for a long time; at the time of this writing, it is an active proposal for standardization <a href="#ANYCSTD">[ANYCSTD]</a>. According to proposal authors, <code>std::any</code> is a container for "Discriminated types that contain values of different types but do not attempt conversion between them". This classifies any as a generic (generic in the sense of "general", not template-based) solution for the first half of the problem - how to accommodate any type in a single container. The "syntactic sugar" is waived template syntax - any itself is not a template class but it has a template constructor and assignment operator; this is conveniently used to avoid the aesthetically unpleasing angle brackets:</p></div>
+<div class="listingblock">
+<div class="title">Listing 1</div>
+<div class="content">
+<pre><code>any a = "42";
+any b(42);</code></pre>
+</div></div>
+<div class="paragraph"><p>What happens "under the hood" is:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+at compile time, assignment (or construction) code for appropriate type is generated
+</p>
+</li>
+<li>
+<p>
+at run time, value is assigned to a polymorphic holder instantiated on the heap
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="title">Listing 2 - Any constructor</div>
+<div class="content">
+<pre><code>template&lt;typename ValueType&gt;
+any(const ValueType &amp; value):content(new holder&lt;ValueType&gt;(value))
+{
+}</code></pre>
+</div></div>
+<div class="paragraph"><p>Runtime dynamism is achieved through polymorphism as shown in Listing 3.</p></div>
+<div class="listingblock">
+<div class="title">Listing 3</div>
+<div class="content">
+<pre><code>class placeholder
+{
+public:
+        virtual ~placeholder()
+        {
+        }
+// ...
+        virtual const std::type_info &amp; type() const = 0;
+// ...
+}
+
+template&lt;typename ValueType&gt;
+class holder : public placeholder
+{
+public:
+        holder(const ValueType &amp; value):held(value)
+        {
+        }
+        // ...
+        ValueType held;
+};</code></pre>
+</div></div>
+<div class="paragraph"><p>Right away, it is obvious that assignment will incur performance penalty due to heap allocation and size/performance penalty due to virtual inheritance. The convenience of any extends from the construction/assignment moment during its lifetime and stops the moment one wants to retrieve the value. Until then, any looks and acts like, well - any value. While it works in a wonderfully transparent manner on the assignment side, the data extraction side is out of any&#8217;s "scope of supply". <code>Poco::Dynamic::Var</code> takes off where any stops, providing user-extensible conversion facilities for non pre-specialized types; the design, rationale, use and performance of this class hierarchy is described later in the article.</p></div>
+<div class="paragraph"><p><code>Poco::Any</code> <a href="#POCOANY">[POCOANY]</a> is a port of Boost.Any to POCO.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_boost_variant">7. Boost.Variant</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>According to the authors <a href="#BOOSVAR">[BOOSVAR]</a>, Boost.Variant class template is "a safe, generic, stack-based discriminated union container, offering a simple solution for manipulating an object from a heterogeneous set of types in a uniform manner". It determines the needed storage at compile time, uses boost::mpl and limits the runtime capabilities to types defined at compile time.</p></div>
+<div class="paragraph"><p>The performance penalty of Boost.Any creation and polymorphic nature, as well as its incapability to provide reliable compile-time type detection were the motivating factors for <code>boost::variant</code> authors. For that reason, variant is stack-based and provides reliable compile-time type detection and value extraction. There is a caveat - to enforce "never empty" requirement, variant may temporarily allocate storage on the heap to keep the old value for case of exception being thrown during assignment. Authors claim to have plans for alleviating this shortcoming.</p></div>
+<div class="paragraph"><p>Faced with a <code>boost::variant</code>, a naïve user may try something like this:</p></div>
+<div class="listingblock">
+<div class="title">Listing 4</div>
+<div class="content">
+<pre><code>variant&lt;int, string&gt; v = 1;
+string s = v; // compile error
+boost::get&lt;std::string&gt;(v); // throws</code></pre>
+</div></div>
+<div class="paragraph"><p>While Boost.Variant offers slightly more cooperation than Boost.Any on the extraction side, it is not seamless nor without dangers - intuitive code won&#8217;t compile while the next simplest way is brittle. Authors admit the shortcomings and brittleness of the above approach and provide visitor pattern as a vehicle to unleash the full strength of Boost.Variant. The visitor is created by inheriting from <code>boost::static_visitor&lt;&gt;</code> class template:</p></div>
+<div class="listingblock">
+<div class="title">Listing 5</div>
+<div class="content">
+<pre><code>class my_visitor : public boost::static_visitor&lt;int&gt;
+{
+public:
+        int operator()(int i) const
+        { return i; }
+
+        int operator()(const std::string &amp; str) const
+         return str.length(); }
+};
+
+int main()
+{
+        boost::variant&lt; int, std::string &gt; u("hello world");
+        std::cout &lt;&lt; u; // output: hello world
+
+        int result = boost::apply_visitor( my_visitor(), u );
+        std::cout &lt;&lt; result; // output: 11 (i.e., length of "hello world")
+}</code></pre>
+</div></div>
+<div class="paragraph"><p>In order to provide the type conversions, however, user must define a visitor per destination type, e.g. to facilitate the most common conversion between numbers and strings, the following minimal set of classes is needed:</p></div>
+<div class="listingblock">
+<div class="title">Listing 6</div>
+<div class="content">
+<pre><code>struct string_int_converter : public boost::static_visitor&lt;int&gt;
+{
+        int operator()(int i) const;
+        int operator()(const std::string &amp; str) const;
+        int operator()(double d) const;
+};
+
+struct string_dbl_converter : public boost::static_visitor&lt;double&gt;
+{
+        double operator()(int i) const;
+        double operator()(const std::string &amp; str) const;
+        double operator()(double d) const;
+};
+
+struct num_string_converter : public boost::static_visitor&lt;std::string&gt;
+{
+        std::string operator()(int i) const;
+        std::string operator()(const std::string&amp; str) const;
+        std::string operator()(double d) const;
+};</code></pre>
+</div></div>
+<div class="paragraph"><p>Internally, the variant data is in-place constructed into the storage allocated at compile time and large enough to accommodate the largest datatype specified; storage is a union of char array plus alignment padding:</p></div>
+<div class="listingblock">
+<div class="title">Listing 7</div>
+<div class="content">
+<pre><code>template &lt;std::size_t size_, std::size_t alignment_&gt;
+struct aligned_storage_imp
+{
+    union data_t
+    {
+        char buf[size_];
+
+        typename mpl::eval_if_c&lt;
+              alignment_ == std::size_t(-1)
+            , mpl::identity&lt;detail::max_align&gt;
+            , type_with_alignment&lt;alignment_&gt;
+            &gt;::type align_;
+    } data_;
+    void* address() const { return const_cast&lt;aligned_storage_imp*&gt;(this); }
+};</code></pre>
+</div></div>
+<div class="paragraph"><p>Typically, depending on the size of the held type, there will be some extra space used (e.g. on 64-bit Win8/VS2012), variant&lt;char&gt; will occupy 8 bytes, while varian&lt;std::string&gt; will occupy 40:</p></div>
+<div class="listingblock">
+<div class="title">Listing 8</div>
+<div class="content">
+<pre><code>variant&lt;char&gt;: (1) 8
+variant&lt;int&gt;: (4) 8
+variant&lt;float&gt;: (4) 8
+variant&lt;double&gt;: (8) 16
+variant&lt;std::string&gt;: (32) 40</code></pre>
+</div></div>
+<div class="paragraph"><p>The most significant constraint of Boost.Variant is that it can only accept a predefined set of types. If a type is not explicitly listed in declaration (template instantiation) of the variant variable, that type can not be assigned to it. The never-empty guarantee creates some serious annoyances and there is some discussion going on as to whether it is a reasonable constraint ot start with. Default constructing variant as empty would aleviate this problem but it would also introduce problem of always having to deal with empty in the visitors.</p></div>
+<div class="sect2">
+<h3 id="_comparison_between_boost_variant_and_boost_any">7.1. Comparison between Boost.Variant and Boost.Any</h3>
+<div class="paragraph"><p>For easier understanding of the concepts behind the two classes described so far, <code>boost::any</code> is often compared to &#8220;type-safe <em>void*</em>&#8221; whereas <code>boost:variant</code> is compared to &#8220;type-safe <em>union</em>&#8221;. While there are certainly similarities, this comparison should be taken cautiously.</p></div>
+<div class="sect3">
+<h4 id="_boost_variant_advantages_over_boost_any">7.1.1. Boost.Variant advantages over Boost.Any:</h4>
+<div class="ulist"><ul>
+<li>
+<p>
+guarantees the type of its content is one of a finite, user-specified set of types
+</p>
+</li>
+<li>
+<p>
+provides compile-time checked generic visitation of its content (Boost.Any provides no visitation mechanism at all; even if it did, it would need to be checked at run-time)
+</p>
+</li>
+<li>
+<p>
+offers an efficient, stack-based storage scheme (avoiding the overhead of dynamic allocation).
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect3">
+<h4 id="_boost_any_advantages_over_boost_variant">7.1.2. Boost.Any advantages over Boost.Variant:</h4>
+<div class="ulist"><ul>
+<li>
+<p>
+allows any type for its content, providing great flexibility
+</p>
+</li>
+<li>
+<p>
+provides the no-throw guarantee of exception safety for its swap operation
+</p>
+</li>
+<li>
+<p>
+no template meta-programming techniques (avoids potentially hard-to-read error messages and significant compile-time processor and memory demands).
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_boosttypeerasure">8. BoostTypeErasure</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>According to the author, type_erasure addresses the shortcomings of C++ runtime polymorphism, in particular its (1) intrusiveness, (2) dynamic memory management and (3) inability to apply multiple independent concepts to a single object. Library uses some advanced constructs such as concepts and template metaprogramming constructs from boost::mpl. Just like boost::variant specifies a set of types that can be contained within it at construction time, type_erasure specifies a set of operations that can be performed on it:</p></div>
+<div class="listingblock">
+<div class="title">Listing 9</div>
+<div class="content">
+<pre><code>any&lt;
+    mpl::vector&lt;
+        copy_constructible&lt;&gt;,
+        typeid_&lt;&gt;,
+        incrementable&lt;&gt;,
+        ostreamable&lt;&gt;
+    &gt;
+&gt; x(10);
+++x; // incrementable
+std::cout &lt;&lt; x &lt;&lt; std::endl; // ostreamable</code></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_facebook_folly_dynamic">9. Facebook folly::dynamic</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing-like classes. The class aims to relax the static typing constraints and it is very similar to Poco::Dynamic::Var.</p></div>
+<div class="listingblock">
+<div class="title">Listing 10</div>
+<div class="content">
+<pre><code>dynamic twelve = 12; // creates a dynamic that holds an integer
+dynamic str = "string"; // yep, this one is an fbstring
+
+// A few other types.
+dynamic nul = nullptr;
+dynamic boolean = false;
+
+// Arrays can be initialized with brackets.
+dynamic array = { "array ", "of ", 4, " elements" };
+assert(array.size() == 4);
+dynamic emptyArray = {};
+assert(array.empty());
+
+// Maps from dynamics to dynamics are called objects.  The
+// dynamic::object constant is how you make an empty map from dynamics
+// to dynamics.
+dynamic map = dynamic::object;
+map["something"] = 12;
+map["another_something"] = map["something"] * 2;
+
+// Dynamic objects may be intialized this way
+dynamic map2 = dynamic::object("something", 12)("another_something", 24);</code></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_poco_dynamic_var">10. Poco::Dynamic::Var</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>As mentioned earlier, Poco Dynamic::Var continues where boost::any stops - on the data extraction side.</p></div>
+<div class="paragraph"><p>In this article, we will also look at other solutions for type erasure, look at their practical uses and compare their interfaces and implementations.</p></div>
+<div class="paragraph"><p>Type safety is an important feature of C++; type erasure is a necessary technique for modern software development. Session examines and compares existing solutions to these important concerns.
+<br />
+<br /></p></div>
+<hr />
+<div class="paragraph"><div class="title">Credits</div><p>I would like to thank Kevlin Henney for feedback and constructive discussions on the topic. Steven Watanabe provided valuable guidance on ``boost::type_erasure``. Andrei Alexandrescu provided valuable feedback and encouragement. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing. Any errors left are author&#8217;s.
+<br />
+<br /></p></div>
+<hr />
+<div class="paragraph" id="NOTSTDY"><div class="title">Static vs. Dynamic</div><p>This classification has to do with timing of value-to-type attachment. Static means values are attached to types (&#8220;compiled&#8221;) at compile time. Dynamic means they are attached (&#8220;interpreted&#8221;) at runtime. Since C++ attaches values to types at compile, it follows that C++ is a statically typed language.</p></div>
+<div class="paragraph"><div class="title">Strong vs. Weak</div><p>This classification has to do with &#8220;loopholes&#8221; the programming language type system leaves open for its type system to be &#8220;subverted&#8221;. Both C and C++ allow different types and pointers thereof to be cast to each other. While C++ is stricter than C, it is also backward compatible. But even without the C compatibility, C++ provides ways to subvert the type system and therefore can not be considered a strongly typed language. As a (non-exhaustive) example, void* and union disqualify C and C++ from strongly-typed qualification.</p></div>
+<hr />
+<div class="paragraph" id="POCOPRJ"><div class="title">References</div><p><a href="http://pocoproject.org/">POCOPRJ</a> C++ Portable Components</p></div>
+<div class="paragraph" id="ROBPIRS"><p><a href="http://robertpirsig.org/MOQSummary.htm">ROBPIRS</a> "A brief summary of the Metaphysics of Quality", Robert Pirsig</p></div>
+<div class="paragraph" id="ACCUC13"><p><a href="http://www.slideshare.net/aleks-f/dynamic-caccu2013">ACCUC13</a> "Dynamic C++", ACCU 2013 Conference</p></div>
+<div class="paragraph" id="ACCUDYN"><p><a href="http://accu.org/index.php/journals/1502">ACCUDY1</a> "DynamicAny", Part I, Alex Fabijanic, ACCU Overload August 2008<br />
+<a href="http://accu.org/index.php/journals/1511">ACCUDY2</a> "DynamicAny", Part II, Alex Fabijanic, ACCU Overload October 2008</p></div>
+<div class="paragraph" id="DOUBCON"><p><a href="http://code.google.com/p/double-conversion/">DOUBCON</a> "Double-conversion library"</p></div>
+<div class="paragraph" id="BOOSANY"><p><a href="http://www.boost.org/doc/libs/1_53_0/doc/html/any.html">BOOSANY</a> Boost.Any</p></div>
+<div class="paragraph" id="POCOANY"><p><a href="http://pocoproject.org/docs/Poco.Any.html">POCOANY</a> Poco::Any</p></div>
+<div class="paragraph" id="ANYCSTD"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3390.html">ANYCSTD</a> "Any Library Proposal", Revision 1, Kevlin Henney, Beman Dawes</p></div>
+<div class="paragraph" id="BOOSVAR"><p><a href="http://www.boost.org/doc/libs/1_52_0/doc/html/variant.html">BOOSVAR</a> "Boost.Variant", Eric Friedman, Itay Maman</p></div>
+<div class="paragraph" id="FOLLYDY"><p><a href="https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md">FOLLYDY</a> Facebook folly library, dynamic class</p></div>
+<div class="paragraph" id="CSHPDYN"><p><a href="http://msdn.microsoft.com/en-us/library/dd264736.aspx">CSHPDYN</a> C# dynamic</p></div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2013-05-06 01:12:38 CEST
+</div>
+</div>
+</body>
+</html>
