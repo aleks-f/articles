@@ -269,7 +269,7 @@ private:
 		return reinterpret_cast<Notifier*>(const_cast<void*>(pSender));
 	}
 
-	void DBEventHandler::notify(Poco::Int64 rowID)
+	void notify(Poco::Int64 rowID)
 	{
 		std::ostringstream os;
 		CSVFormatter cf;
@@ -278,7 +278,7 @@ private:
 		_factory.handler().send(os.str());
 	}
 
-	void DBEventHandler::onInsert(const void* pSender)
+	void onInsert(const void* pSender)
 	{
 		Notifier* pN = notifier(pSender);
 		Poco::Int64 rowID = pN->getRow();
@@ -286,7 +286,7 @@ private:
 		notify(rowID);
 	}
 
-	void DBEventHandler::onUpdate(const void* pSender)
+	void onUpdate(const void* pSender)
 	{
 		Notifier* pN = notifier(pSender);
 		Poco::Int64 rowID = pN->getRow();

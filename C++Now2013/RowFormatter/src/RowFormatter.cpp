@@ -261,12 +261,14 @@ public:
 		if (path == "/html")
 		{
 			response.setContentType("text/html");
-			response.send() << RecordSet(Session("SQLite", "simpsons.db"), sql, new HTMLTableFormatter);
+			Session session("SQLite", "simpsons.db");
+			response.send() << RecordSet(session, sql, HTMLTableFormatter());
 		}
 		else if (path == "/xml")
 		{
 			response.setContentType("text/xml");
-			response.send() << RecordSet(Session("SQLite", "simpsons.db"), sql, new XMLFormatter);
+			Session session("SQLite", "simpsons.db");
+			response.send() << RecordSet(session, sql, XMLFormatter());
 		}
 	}
 };
