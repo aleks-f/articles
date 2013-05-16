@@ -75,11 +75,12 @@ using Poco::Net::HTTPServerParams;
 using Poco::Net::HTTPResponse;
 
 
-#define ROOT_DIR "C:\\trunk\\Data\\samples\\RowFormatter\\bin\\"
+#define ROOT_DIR "/Users/alex/github/articles/C++Now2013/RowFormatter/"
 
 
 std::string getSQL(const std::string& file = ROOT_DIR"simpsons.sql")
 {
+	std::cout << file << std::endl;
 	Poco::FileInputStream fis(file);
 	std::string read, tmp;
 	while (!fis.eof()) { fis >> tmp; tmp += ' '; read += tmp; }
@@ -258,16 +259,15 @@ public:
 		std::string path = uri.getPath();
 		std::string sql = getSQL();
 		std:: cout << "Executing;[" << sql << ']' << std::endl;
+		Session session("SQLite", ROOT_DIR"simpsons.db");
 		if (path == "/html")
 		{
 			response.setContentType("text/html");
-			Session session("SQLite", "simpsons.db");
 			response.send() << RecordSet(session, sql, HTMLTableFormatter());
 		}
 		else if (path == "/xml")
 		{
 			response.setContentType("text/xml");
-			Session session("SQLite", "simpsons.db");
 			response.send() << RecordSet(session, sql, XMLFormatter());
 		}
 	}
