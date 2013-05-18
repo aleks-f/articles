@@ -1,0 +1,131 @@
+`Dynamic C++, Part II`
+====================
+Alex Fabijanic <alex@pocoproject.org>
+:Author Initials: AF
+:toc:
+:icons:
+:numbered:
+:website: http://pocoproject.org
+
+[quote, Robert Pirsig, Metaphysics of Quality]
+As to which is more important, Dynamic or static, both are absolutely essential, even when they are in conflict.
+
+== Introduction
+
+C$$++$$ is a statically-typed language. The static nature of the C$$++$$ type system provides a data integrity ``safety net''. The compiler is an indispensable runtime-surprise-prevention tool and the static nature of C$$++$$ provides runtime performance gain. Before we go any further, let's clarify the nomenclature - static typing here should not be confused with its close relative strong-typing, see <<NOTSTDY>> for details. It is precisely the ``weaknesses'' of the type system (in combination with polymorphism and templates) that provides the  functionality needed for dynamic-like behavior within a statically typed language such as C$$++$$. And there are circumstances calling for a ``softened'' type system, where a degree of performance sacrifice is acceptable and runtime type system relaxation desirable (or even necessary). To provide generic functionality automatically adaptable to different data types at runtime within the confines of standard C$$++$$, the runtime type detection system does not suffice - one has to resort to library solutions based on various techniques described later.
+	
+Data from external data sources arrives in a variety of types and brings along the need for efficient and transparent datatype conversion. The proliferation of web-based interfaces and databases with the addition of popular textual formats such as JSON and XML exacerbates the need for a relaxed type system with transparent and safe conversion facilities. This is a domain where dynamic languages have gained a significant footing. In order to clarify the premises for this writing, we must take a brief detour here ...
+
+== BoostTypeErasure
+
+According to the author, type_erasure addresses the shortcomings of C++ runtime polymorphism, in particular its (1) intrusiveness, (2) dynamic memory management and (3) inability to apply multiple independent concepts to a single object. Library uses some advanced constructs such as concepts and template metaprogramming constructs from boost::mpl. Just like boost::variant specifies a set of types that can be contained within it at construction time, type_erasure specifies a set of operations that can be performed on it:
+
+.Listing 1
+----
+any<
+    mpl::vector<
+        copy_constructible<>,
+        typeid_<>,
+        incrementable<>,
+        ostreamable<>
+    >
+> x(10);
+++x; // incrementable
+std::cout << x << std::endl; // ostreamable
+----
+
+== Facebook folly::dynamic
+
+The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing-like classes. The class aims to relax the static typing constraints and it is very similar to Poco::Dynamic::Var.
+
+.Listing 2
+----
+dynamic twelve = 12; // creates a dynamic that holds an integer
+dynamic str = "string"; // yep, this one is an fbstring
+
+// A few other types.
+dynamic nul = nullptr;
+dynamic boolean = false;
+
+// Arrays can be initialized with brackets.
+dynamic array = { "array ", "of ", 4, " elements" };
+assert(array.size() == 4);
+dynamic emptyArray = {};
+assert(array.empty());
+
+// Maps from dynamics to dynamics are called objects.  The
+// dynamic::object constant is how you make an empty map from dynamics
+// to dynamics.
+dynamic map = dynamic::object;
+map["something"] = 12;
+map["another_something"] = map["something"] * 2;
+	
+// Dynamic objects may be intialized this way
+dynamic map2 = dynamic::object("something", 12)("another_something", 24);
+----
+
+Poco::Dynamic::Var
+------------------
+
+As mentioned earlier, Poco Dynamic::Var continues where boost::any stops - on the data extraction side.
+
+In this article, we will also look at other solutions for type erasure, look at their practical uses and compare their interfaces and implementations.
+
+Type safety is an important feature of C++; type erasure is a necessary technique for modern software development. Session examines and compares existing solutions to these important concerns.
+ +
+ +
+
+''''
+.Credits
+
+I would like to thank Kevlin Henney for feedback and constructive discussions on the topic. Steven Watanabe provided valuable advice on `boost::type_erasure`. Günter Obiltschnig and Andrei Alexandrescu provided valuable feedback and encouragement. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing. Any errors left are author's.
+ +
+ +
+
+''''
+[[NOTSTDY]]
+.Static vs. Dynamic
+This classification has to do with timing of value-to-type attachment. Static means values are attached to types (``compiled'') at compile time. Dynamic means they are attached (``interpreted'') at runtime. Since C$$++$$ attaches values to types at compile, it follows that C$$++$$ is a statically typed language.
+
+.Strong vs. Weak
+This classification has to do with ``loopholes'' the programming language type system leaves open for its type system to be ``subverted''. Both C and C$$++$$ allow different types and pointers thereof to be cast to each other. While C$$++$$ is stricter than C, it is also backward compatible. But even without the C compatibility, C$$++$$ provides ways to subvert the type system and therefore can not be considered a strongly typed language. As a (non-exhaustive) example, void* and union disqualify C and C++ from strongly-typed qualification.
+
+''''
+
+.References
+
+[[POCOPRJ]]
+http://pocoproject.org/[POCOPRJ] C$$++$$ Portable Components
+
+[[ROBPIRS]]
+http://robertpirsig.org/MOQSummary.htm[ROBPIRS] "A brief summary of the Metaphysics of Quality", Robert Pirsig
+
+[[ACCUC13]]
+http://www.slideshare.net/aleks-f/dynamic-caccu2013[ACCUC13] "Dynamic C++", ACCU 2013 Conference
+
+[[ACCUDYN]]
+http://accu.org/index.php/journals/1502[ACCUDY1] "DynamicAny", Part I, Alex Fabijanic, ACCU Overload August 2008 +
+http://accu.org/index.php/journals/1511[ACCUDY2] "DynamicAny", Part II, Alex Fabijanic, ACCU Overload October 2008
+
+[[DOUBCON]]
+http://code.google.com/p/double-conversion/[DOUBCON] "Double-conversion library"
+
+[[BOOSANY]]
+http://www.boost.org/doc/libs/1_53_0/doc/html/any.html[BOOSANY] Boost.Any
+
+[[POCOANY]]
+http://pocoproject.org/docs/Poco.Any.html[POCOANY] Poco::Any
+
+[[ANYCSTD]]
+http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3390.html[ANYCSTD] "Any Library Proposal", Revision 1, Kevlin Henney, Beman Dawes
+
+[[BOOSVAR]]
+http://www.boost.org/doc/libs/1_52_0/doc/html/variant.html[BOOSVAR] "Boost.Variant", Eric Friedman, Itay Maman
+
+[[FOLLYDY]]
+https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md[FOLLYDY] Facebook folly library, dynamic class
+
+[[CSHPDYN]]
+http://msdn.microsoft.com/en-us/library/dd264736.aspx[CSHPDYN] C# dynamic
+
+

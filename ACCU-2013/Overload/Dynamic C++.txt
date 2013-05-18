@@ -1,5 +1,5 @@
-`Dynamic C++`
-=============
+`Dynamic C++, Part I`
+====================
 Alex Fabijanic <alex@pocoproject.org>
 :Author Initials: AF
 :toc:
@@ -12,21 +12,37 @@ As to which is more important, Dynamic or static, both are absolutely essential,
 
 == Introduction
 
-C$$++$$ is statically-typed language. The static nature of the C$$++$$ type system provides the data integrity "safety net". Compiler is an indispensable runtime-surprise-prevention tool and the static nature of C$$++$$ provides runtime performance gain. Before we go any further, let's clarify the nomenclature - static typing here should not be confused with its close relative strong-typing, see <<NOTSTDY>> for details. It is precisely the ``weakness'' of the type system (in combination with polymorphism and templates) that provides functinality needed for dynamic-like behavior within a statically typed language such as C$$++$$. And there are circumstances calling for a ``softened'' type system, where a degree of performance sacrifice is acceptable and runtime type system relaxation desirable (or even necessary). To provide generic functionality automatically adaptable to different data types at runtime within the confines of standard C$$++$$, the runtime type detection system does not suffice - one has to resort to library solutions based on various techniques described later.
+C$$++$$ is a statically-typed language. The static nature of the C$$++$$ type system provides a data integrity ``safety net''. The compiler is an indispensable runtime-surprise-prevention tool and the static nature of C$$++$$ provides runtime performance gain. Before we go any further, let's clarify the nomenclature - static typing here should not be confused with its close relative strong-typing, see <<NOTSTDY>> for details. It is precisely the ``weaknesses'' of the type system (in combination with polymorphism and templates) that provides the  functionality needed for dynamic-like behavior within a statically typed language such as C$$++$$. And there are circumstances calling for a ``softened'' type system, where a degree of performance sacrifice is acceptable and runtime type system relaxation desirable (or even necessary). To provide generic functionality automatically adaptable to different data types at runtime within the confines of standard C$$++$$, the runtime type detection system does not suffice - one has to resort to library solutions based on various techniques described later.
 	
-Data from external data sources arrives in a variety of types and brings along the need for efficient and transparent datatype conversion. The proliferation of web-based interfaces and databases with addition of popular textual formats such as JSON and XML exacerbates the need for relaxed type system with transparent and safe conversion facilities. This is a domain where dynamic languages have gained a significant footing. In order to clarify the premises for this writing, we must take a brief detour here ...
+Data from external data sources arrives in a variety of types and brings along the need for efficient and transparent datatype conversion. The proliferation of web-based interfaces and databases with the addition of popular textual formats such as JSON and XML exacerbates the need for a relaxed type system with transparent and safe conversion facilities. This is a domain where dynamic languages have gained a significant footing. In order to clarify the premises for this writing, we must take a brief detour here ...
 
-
-.Detour
+.C$$++$$ Dynamism
 *******************************
-To get a broader perspective, let's look at the need for and benefits of ``dynamic'' typing in C$$++$$. Even the dynamic language environments are ultimately built on a statically typed foundation. Yet, when the static/dynamic langugage interaction need arises, we embed those ``foreign'' language environments and we must sepak to them in a ``foreign tongue'' (i.e. through a specialized translation layer). Wouldn't it be nice to (a) smoothen the rough edge between the two in a reusable way, while also (b) addressing the concern of dealing with external data of different types and (c) gain a generic-purpose standard C$$++$$ ``dynamic'' environment natively and seamlessly, as a side-efect? While standard C++ claims to be a general-purpose language, it stops abruptly at the point where (among other things) dynamic-language-like behavior is needed - as things stand at the time of this writing, even a well-known, half-way-there oldie like `boost::any` could only make it to 2014 TS, which means it will not be standardized earlier than 2017. The original spark (`boost::any` port to POCO some years ago) triggering this systematic overview was decidedly not about C$$++$$ as a ``dynamic'' language but rather about a way to work around the rigidly static C$$++$$ type system in a reasonably efficient and reusable way - through a library solution. But libraries are languages, so the C$$++$$ library solutions for type dynamics are C$$++$$'s native ``dynamic'' languages of sorts. Although the underlying types are still statically defined, due to the weakness of C$$++$$ type system, they can be dynamically held; and one can coax them to be readily available at runtime, holding values of different types, that they very much ``quack and walk'' as a dynamic language... Suddenly, the idea of a native C$$++$$ ``dynamic language'' does not sound so outlandish ...
+To get a broader perspective, let's look at the need for and benefits of ``dynamic'' typing in C$$++$$. Even the dynamic language environments are ultimately built on a statically typed foundation. Yet, when the static/dynamic langugage interaction need arises, we embed those ``foreign'' language environments and we must speak to them in a ``foreign tongue'' (i.e. through a specialized translation layer). Wouldn't it be nice to (a) smooth the rough edge between the two in a reusable way, while also (b) addressing the concern of dealing with external data of different types and (c) gain a generic-purpose standard C$$++$$ ``dynamic'' environment natively and seamlessly, as a side-effect? While standard C++ claims to be a general-purpose language, it stops abruptly at the point where (among other things) dynamic-language-like behavior is needed - as things stand at the time of this writing, even a well-known, half-way-there oldie like `boost::any` could only make it to 2014 Technical Specification (a pre-standardization mechanism for almost-there-but-not-yet-standard-ready libraries and language features), which means it will not be standardized will not be standardized until 2017 at least. The original spark triggering this systematic overview (`boost::any` port to POCO some years ago) was decidedly not about C$$++$$ as a ``dynamic'' language but rather about a way to work around the rigidly static C$$++$$ type system in a reasonably efficient and reusable way - through a library solution. But libraries _are_ languages, so the C$$++$$ library solutions for type dynamics are C$$++$$'s native ``dynamic'' languages of sorts. Although the underlying types are still statically defined, due to the weakness of C$$++$$ type system, they can be dynamically held; and one can coax them to be readily available at runtime, holding values of different types, that they very much ``quack and walk'' as a dynamic language... Suddenly, the idea of a native C$$++$$ ``dynamic language'' does not sound so outlandish ...
 ******************************
 
-So, back on track - is it possible to provide dynamic-like behavior within the constraints of standard ANSI/ISO C$$++$$? How can a C$$++$$ programmer accurately and efficiently transfer data from a database to XML, JSON or HTML without stumbling over the rigid C$$++$$ static type-checking mechanism at compile time while ensuring accuracy at runtime? Can type-erasure and (checked) type-conversion techniques fit the bill? Given both historical (ANSI C union and void*, MS COM Variant, boost$$::$$[variant, any, lexical_cast], Qt QVariant, adobe$$::$$any_regular) and recent (Boost.TypeErasure, Facebook folly$$::$$dynamic) development trends (including pending Boost.Any C$$++$$ standard proposal), the need for a way around the static nature of C$$++$$ language is obvious. Since the DynamicAny <<ACCUDYN>> article, some new solutions <<FOLLYDY>> have appeared, POCO <<POCOPRJ>> has seen several release cycles and `Poco::DynamicAny` is now known under a new name - `Poco::Dynamic::Var`. Additionally, the performance and type-safety of number/string conversion has been improved by replacing sscanf/sprintf-based conversion with double-conversion <<DOUBCON>> (also used by `folly::dynamic`). In this article series, both externals and internals of boost::[variant, any, type_erasure], folly$$::$$dynamic, Poco$$::$$Dynamic$$::$$Var, Qt QVariant and adobe$$::$$any_regular are explored and compared. Design, capabilities, ease of use as well as pros and cons of each solution will be examined. Performance benchmark comparisons results will be provided as well. 
+So, back on track - is it possible to provide dynamic-like behavior within the constraints of standard ANSI/ISO C$$++$$? How can a C$$++$$ programmer accurately and efficiently transfer data from a database to XML, JSON or HTML without stumbling over the rigid C$$++$$ static type-checking mechanism at compile time while ensuring accuracy at runtime? Can type-erasure and (checked) type-conversion techniques fit the bill? Given both historical (ANSI C union and void*, MS COM Variant, boost$$::$$[variant, any, lexical_cast], Qt QVariant, adobe$$::$$any_regular) and recent (Boost.TypeErasure, Facebook folly$$::$$dynamic) development trends (including the pending Boost.Any C$$++$$ standard proposal), the need for a way around the static nature of C$$++$$ language is obvious. Since the DynamicAny <<ACCUDYN>> article, some new solutions <<FOLLYDY>> have appeared, POCO <<POCOPRJ>> has seen several release cycles and `Poco::DynamicAny` is now known under a new name - `Poco::Dynamic::Var`. Additionally, the performance and type-safety of number/string conversion has been improved by replacing sscanf/sprintf-based conversion with double-conversion <<DOUBCON>> (also used by `folly::dynamic`). 
 
-We will start our journey through Dynamic C$$++$$ world with a smooth sail - simple, minimalistic and well-known `boost::any`, a bipolar class with deceptively soft, entirely type-agnostic conception and surprisingly rigid, ultra-strongly typed delivery interface (or, should we say, lack thereof). As we move on, the journey takes us to rough waters of solutions that endeavor, each in its own way, to provide dynamic facilities within the confines of standard C$$++$$ and its static type system. The solutions gradually build on existing foundations, attacking the problem from various aspects while trying to keep size, performance and datatype integrity under control. 
+.POCO
+*******************************	
+POrtable COmponents C++ Libraries are:
 
-But, first things first - let us start by looking at concerns shaping the solutions and ingredients they're made of.
+- A collection of C++ class libraries, concpetually similar to the Java Class Library, the .NET Framework or Apple's Cocoa.
+- Focused on solutions to frequently-encountered practical problems.
+- Focused on "internet-age" network-centric applications.
+- Written in eﬃcient, modern, 100% ANSI/ISO Standard C$$++$$
+- Based on and complementing the C$$++$$ Standard Library/STL.
+- Highly portable and available on many diﬀerent platforms.
+- Open Source, licensed under the Boost Software License.
+
+In regards to Boost, in spite of some functional overlapping, POCO is best thought of as a Boost complement (rather than replacement). Side-by-side use of Boost and POCO is a very common occurence.
+******************************
+
+In this article series, both externals and internals of boost::[variant, any, type_erasure], folly$$::$$dynamic, Poco$$::$$Dynamic$$::$$Var, Qt QVariant and adobe$$::$$any_regular are explored and compared. Design, capabilities, ease of use as well as pros and cons of each solution will be examined. Performance benchmark comparisons results will be provided as well. 
+
+We will start our journey through Dynamic C$$++$$ world with a smooth sail - simple, minimalistic and well-known `boost::any`, a ``bipolar'' class with deceptively soft, entirely type-agnostic conception and surprisingly rigid, ultra-strongly typed delivery interface (or, should we say, lack thereof). As we move on, the journey takes us into the rough waters of solutions that endeavor, each in its own way, to provide dynamic facilities within the confines of standard C$$++$$ and its static type system. The solutions gradually build on existing foundations, attacking the problem from various angles while trying to keep size, performance and datatype integrity under control. 
+
+But, first things first - let us start by looking at the concerns shaping the solutions and the ingredients they're made of.
 
 == Dynamic Concerns
 
@@ -35,19 +51,19 @@ What are the concerns involved with dynamic behavior and how are they solved? Le
 .Concerns
 Storing Value::
 
-This concern has to do with the location where the actual bits representing the value reside. Within C$$++$$ memory model, there are two distinct choices - heap and stack - and a hybrid between the two. More on this in Data Storage paragraph later. There are various memory allocation optimization methods that look just like heap allocation  from programmer's standpoint but actually allocate from different places; such constructs are beyond the scope of this article.
+This concern has to do with the location where the actual bits representing the value reside. Within the C$$++$$ memory model, there are two distinct choices - heap and stack - and a hybrid between the two; more on this later. There are various memory allocation optimization methods that look just like heap allocation from programmer's standpoint but actually allocate from different places; such constructs are beyond the scope of this article. Let us just mention here that the term "stack" above should be used cautiously; it is very common to refer to _placement new_ techniques constructing objects in a dedicated storage inside a class as "stack-based"; that convention is used in this article as well. It is, however, important to remember that there is nothing preventing an object of such class to be allocated on the heap. 
 
 Performing Operations::
 
-Most frequently encountered operations are type conversions, between string and numeric or other values. Furthermore, there's assignment and arithmetic, logical operators. There are other language operations such as e.g. bitwise but those are not of concern for this article's theme. Finally, there are various conversions or transformations; as we will see later, some solutions even provide capability to add custom operations to types at compile time.
+The most frequently encountered operations are type conversions, between string and numeric or other values. Furthermore, there's assignment, arithmetic and logical operators. There are other language operations such as e.g. bitwise but those are not of concern for this article's theme. Finally, there are various conversions or transformations; as we will see later, some solutions even provide capability to add custom operations to types at compile time.
  
 Retrieving Value::
 
-Value retrieval ranges from a strict requirement for explicit held type to transparent conversion between different types, sometimes with runtime exceptions thrown if conversion is impossible; with some solutions, it is very easy to venture into undefined behavior if user is not careful. Sometimes, built-in value retrieval is readily available, while in some cases the user is required to use existing or provide custom external "scaffolding" in order to extract the held value.
+Value retrieval ranges from a strict requirement to explicitly specify the held type, to transparent conversion between different types, sometimes with runtime exceptions thrown if conversion is impossible; with some solutions, it is very easy to venture into undefined behavior if the user is not careful. Sometimes, built-in value retrieval is readily available, while in some cases the user is required to use pre-existing or provide custom external "scaffolding" in order to extract the held value.
 
 Runtime Performance::
 
-From the runtime performance standpoint, there will typically be two concerns: heap memory allocation and conversion/transformation costs. From this aspect, anything that could be done at compile time, should. Additionally, as mentioned above, small object optimization affects runtime performance in both ways - positively when heap allocation is avoided and negatively every time value is retrieved.
+From the runtime performance standpoint, there will typically be two concerns: heap memory allocation and conversion/transformation costs. From this aspect, anything that could be done at compile time, should. Additionally, as mentioned above, small object optimization affects runtime performance in both ways - positively when heap allocation is avoided and negatively every time the value is retrieved.
 
 Memory Usage::
 
@@ -59,23 +75,23 @@ The binary code size generated by various solutions will mostly be proportional 
 
 Ease of Use::
 
-Last but not least, this concern regards user experience when dealing with dynamic functionality. Some solutions have rigid compile-time constraints, while some others may exhibit surprising runtime behavior. If user, in order to use a software component correctly, has to understand its implementation details, the total value of the abstraction is diminished regardless of the implementation quality. Or, as Scott Meyers succintly puts it, ``Make interfaces easy to use correctly and hard to use incorrectly''.
+Last but not least, this concerns the user experience when dealing with dynamic functionality. Some solutions have rigid compile-time constraints, while some others may exhibit surprising runtime behavior. If the user has to understand its implementation details in order to use a software component correctly, the total value of the abstraction is diminished regardless of the implementation quality. Or, as Scott Meyers succintly puts it, ``Make interfaces easy to use correctly and hard to use incorrectly''.
 
 == Data Storage
 
-If the value  resides on the heap, we will pay in runtime performance for memory allocation. However, the amount of memory will be variable, commensurate with the size of held type plus platform-dependent padding/alignment. If value resides on the stack, we will invariably pay the storage size of the largest value we wish to store. And then, there is a hybrid solution (also known as small object optimization, configurable at compile time) which, to an extent, compromises the stack size concern in order to avoid the heap allocation penalty for types under certain size; this solution, however, imposes runtime penalties of size inspection (a) before instantiation and (b) at every value retrieval.
+If the value  resides on the heap, we will pay in runtime performance for memory allocation. However, the amount of memory will be variable, commensurate with the size of held type plus platform-dependent padding/alignment. If the value resides on the stack, we will invariably pay the storage size of the largest value we wish to store. And then, there is a hybrid solution (also known as small object optimization, configurable at compile time) which, to an extent, compromises the stack size concern in order to avoid the heap allocation penalty for types under certain size; this solution, however, imposes runtime penalties of size inspection (a) before instantiation and (b) at every value retrieval.
 
 === Heap 
 
 .Options
 _void*_ and _operator new_::
 
-This technique provides dynamic-like behavior by virtue of _void*_, a C language construct allowing pointers to unknown types. The default _operator new_ allocates memory on the heap. Due to type-independent nature of _void*_, newly created entity can be of any type, so the _new operator_ can construct whatever the type needed in the allocated memory; note the difference in word order - _new operator_ first calls _operator new_ and, after the memory is allocated, constructs the object. From that point on, it is up to the ``dynamic'' solution and programmer to ensure the newly created type value is properly treated. There are some variations on this theme in later described solutions and we will examine them in their due time.
+This technique provides dynamic-like behavior by virtue of _void*_, a C language construct allowing pointers to unknown types. The default _operator new_ allocates memory on the heap. Due to the type-independent nature of _void*_, the newly created entity can be of any type, so the _new operator_ can construct the type needed in the allocated memory; note the difference in word order - _new operator_ first calls _operator new_ and, after the memory is allocated, constructs the object. From that point on, it is up to the ``dynamic'' solution and programmer to ensure the newly created type value is properly treated. There are some variations on this theme in later described solutions and we will examine them in due course.
 
 .Concerns
 Allocation Overhead:: 
 
-Memory allocation on the heap can be an expensive runtime operation; for optimization purposes, language allows overloading of the _operator new_. This allows for various schemes of memory (pre)allocation that alleviate the performance hit imposed by default _operator new_.
+Memory allocation on the heap can be an expensive runtime operation; for optimization purposes the language allows overloading of the _operator new_. This allows for various schemes of memory (pre)allocation that alleviate the performance hit imposed by the default _operator new_.
 
 Memory Cleanup::
 
@@ -83,15 +99,24 @@ Memory that was allocated on the heap by _new_ must be released with _delete_.
 
 === Stack
 
+As mentioned earlier, although commonly referred to as "stack", a more appropriate name would be ``internal'' because there is nothing preventing the creation of object on the heap.
+
 .Options
+_union_ + tag
+
+This technique utilizes the C$$++$$ _union_ facility. Unlike _struct_, whose members are laid out in memory next to each other, _union_ can only hold one value at a time because its data members overlap. This _union_ feature provides the same storage location for different types - a feature that can be exploited for dynamic-type-like behavior at runtime without paying the full sum-of-storage price for all the types supported. Additional tag is needed to indicate the currently active union member. In C$$++$$03 standard, the limitation is that only POD and classes with trivial construction/destruction can be used. C++11 standard relaxes the only-trivial-construction/destruction limitation.
+
 _union_ + placement _new_
 
-This technique utilizes the C-language _union_ facility in combination with placement _new_. Unlike _struct_, whose members are laid out in memory next to each other, _union_ can only hold one value at a time because internally, _union_ data members overlap. This _union_ feature provides the same storage location for different types - a feature that can be exploited for dynamic-type-like behavior at runtime without paying the full sum-of-storage price for all the types supported. In these scenarios, placement _new_ is typically used, which does not allocate memory but only constructs object in pre-allocated storage. This usually happens on the stack.
+This technique utilizes the C$$++$$ _union_ in combination with placement _new_. Placement _new_ does not allocate memory but only constructs object in pre-allocated storage. The reason for the use of _union_ is twofold:
+
+- there is a need for a special-purpose union member ensuring proper alignment for the largest type held when it is not known at compile time
+- there are ``hybrid'' solutions, mixing types known at compile time with ``raw'' storage for the unknown types (placement-new-constructed at runtime); the tag indicating currently active type is necessary in this case
 
 .Concerns
 Size::
 
-Since _union_ must accomodate the largest type supported, it has to occupy at least the largest type size. 
+Since a _union_ must accomodate the largest type supported, it has to occupy at least the largest type size. 
 
 Alignment:: 
 
@@ -99,19 +124,19 @@ In practice, the amount of space needed is often more than largest _union_ membe
 
 Destruction::
 
-Since object is constructed in pre-allocated storage, there is no need to explicitly call _delete_. This, however, means that the destructor has to be called explicitly by the programmer.
+When the held object is placement-new constructed in pre-allocated storage, there is no need to explicitly call _delete_. This, however, means that the destructor has to be called explicitly by the programmer.
 
 === Hybrid
 
 .Options
 Small Object Optimization::
 
-This is a combined technique of heap- and stack-based storage strategies. Programmer decides and specifies at compile time the limit in object size that should be created on the stack. At runtime, based on the compile-time value, the decision is made whether the new object will be constructed on the stack or the storage for it to be constructed will be allocated on the heap.
+This is a combined technique of heap- and stack-based storage strategies. The programmer decides and specifies at compile time the maximum object size that can be created on the stack. At runtime, based on the compile-time value, the decision is made whether the new object will be constructed on the stack or the storage for it to be constructed will be allocated on the heap.
 
 .Concerns
 Runtime Detection Performance::
 
-Obviously, every creation and retrieval of the value will incur the penalty of the value location detection. There are additional difficulties with assignment and swap operations as well as with the exception safety.
+Obviously, every creation and retrieval of the value will incur the penalty of the value location detection. There are additional difficulties with assignment and swap operations as well as with exception safety.
 
 Stack Use::
 
@@ -121,15 +146,15 @@ The fixed stack space is used indiscriminately, even when the value is allocated
 
 Type Conversions::
 
-Type conversions are most frequently encountered operations, the most frequent conversions being those between numbers and strigs. Conversions between compatible types (e.g. short to int) can be performed statically. If static conversion is not possible, then dynamic functionality must take its place; this typically involves parsing a string to generate a corresponding number or vice-versa - formatting a number into string. Not all solutions described here are equally cooperative in this area; they range from those not providing any (no pun intended) conversions, over those providing accompanying mechanisms for defining conversion facilities to those providing built-in conversions.
+Type conversions are the most frequently encountered operations, the most frequent conversions being those between numbers and strings. Conversions between compatible types (e.g. short to int) can often be performed statically. If static conversion is not possible, then dynamic functionality must take its place; this typically involves parsing a string to generate a corresponding number or vice-versa - formatting a number into string. Not all solutions described here are equally cooperative in this area; they range from those not providing any (no pun intended) conversions, via those providing accompanying mechanisms for defining conversion facilities to those providing built-in conversions.
 
 Standard Language Operations (+, -, ==, ...)::
 
-These operations are indispensible for built-in types. They can also be brittle due to many runtime cases where they may make no sense for the held types/values. The choice, therefore, is to either not provide them at all or provide them and throw exception at runtime if the attempted operation makes no sense for the current values. The latter behavior is consistent with the way a dynamic language would behave.
+These operations are indispensible for built-in types. They can also be brittle due to many runtime cases where they may make no sense for the held types/values. Therefore the choice is to either not provide them at all, or provide them and throw exception at runtime if the attempted operation makes no sense for the current values. The latter behavior is consistent with the way a dynamic language would behave.
 
 Custom Operations::
 
-This is an area where things get really complicated - ``dynamically'' attaching operations to types that do not ``natively'' support them. There are some solutions that provide this functionality. There are aslo some pitfalls thereof. These will be analyzed and discussed later, in the context of said solutions presentation.
+This is an area where things get really complicated - ``dynamically'' attaching operations to types that do not ``natively'' support them. There are some solutions that provide this functionality. There are also some pitfalls. These will be analyzed and discussed later.
 
 == Ingredients
 
@@ -144,13 +169,13 @@ The ``ingredients'' for the dynamic functionality within C$$++$$ ``recipe'' are 
 
 From the entities listed above, we already discussed _new_ and _union_; the ones that were not touched on so far are virtual functions and templates.
 
-*Virtual functions* are, of course, an indispensable mechanism for runtime polymorphism, providing objects with identical interface that behave differently. They help tremendously in defining conversions and other operations, where it is very convenient to provide default behavior (often throwing exception) in parent class and appropriately define it in descendants. Virtual functions inflict both size and performance penalty.
+*Virtual functions* are, of course, an indispensable mechanism for runtime polymorphism, providing objects with identical interface that behave differently. They help tremendously in defining conversions and other operations, where it is very convenient to provide default behavior (often throwing an exception) in the parent class and appropriately override it in descendants. Virtual functions inflict both size and performance penalty.
 
-*Templates* are another powerful C$$++$$ mechanism providing compile-time genericity. When combined with other facilities described here, templates can produce very powerful (but often complicated as well) programming constructs.
+*Templates* are another powerful C$$++$$ mechanism providing compile-time genericity. When combined with other facilities described here, templates can produce very powerful (but often complicated) programming constructs.
 
 == Boost.Any
 
-This well-known class has been around for a long time; at the time of this writing, it is an active proposal for standardization <<ANYCSTD>>. According to proposal authors, `std::any` is a container for "Discriminated types that contain values of different types but do not attempt conversion between them". This classifies any as a generic (generic in the sense of "general", not template-based) solution for the first half of the problem - how to accommodate any type in a single container. The "syntactic sugar" is waived template syntax - any itself is not a template class but it has a template constructor and assignment operator; this is conveniently used to avoid the aesthetically unpleasing angle brackets:
+This well-known class has been around for a long time; at the time of this writing, it is an active proposal for standardization <<ANYCSTD>>. According to proposal authors, `std::any` is a container for "Discriminated types that contain values of different types but do not attempt conversion between them". This classifies any as a generic (in the sense of "general", not template-based) solution for the first half of the problem - how to accommodate any type in a single container. The "syntactic sugar" is avoided template syntax - any itself is not a template class but it has a template constructor and assignment operator; this is conveniently used to avoid the aesthetically displeasing angle brackets:
 
 .Listing 1
 ----
@@ -161,8 +186,8 @@ any b(42);
 
 What happens "under the hood" is:
 
-- at compile time, assignment (or construction) code for appropriate type is generated
-- at run time, value is assigned to a polymorphic holder instantiated on the heap
+- at compile time, assignment (or construction) code for the appropriate type is generated
+- at run time, the value is assigned to a polymorphic holder instantiated on the heap
 
 .Listing 2 - Any constructor
 ----
@@ -200,7 +225,7 @@ public:
 };
 ----
 
-Right away, it is obvious that assignment will incur performance penalty due to heap allocation and size/performance penalty due to virtual inheritance. The convenience of any extends from the construction/assignment moment during its lifetime and stops the moment one wants to retrieve the value. Until then, any looks and acts like, well - any value. While it works in a wonderfully transparent manner on the assignment side, the data extraction side is out of any's "scope of supply". `Poco::Dynamic::Var` takes off where any stops, providing user-extensible conversion facilities for non pre-specialized types; the design, rationale, use and performance of this class hierarchy is described later in the article.
+Right away, it is obvious that assignment will incur a performance penalty due to heap allocation, and a size/performance penalty due to virtual inheritance of the internal placeholder. The convenience of `any` extends from the construction/assignment moment during its lifetime and stops the moment one wants to retrieve the value. Until then, `any` looks and acts like, well - any value. While it works in a wonderfully transparent manner on the assignment side, the data extraction side is out of `any`'s "scope of supply" - the class does not offer value retrieval or type conversion functionality; the only way to retrieve the value is through `any_cast` - a set of free-standing functions that either return the value of the exact held type or throw if something else is requested. `Poco::Dynamic::Var` takes off where any stops, providing user-extensible conversion facilities for non pre-specialized types; the design, rationale, use and performance of this class hierarchy is described in a later installment of this series of articles.
 
 
 `Poco::Any` <<POCOANY>> is a port of Boost.Any to POCO.
@@ -209,9 +234,9 @@ Right away, it is obvious that assignment will incur performance penalty due to 
 
 According to the authors <<BOOSVAR>>, Boost.Variant class template is "a safe, generic, stack-based discriminated union container, offering a simple solution for manipulating an object from a heterogeneous set of types in a uniform manner". It determines the needed storage at compile time, uses boost::mpl and limits the runtime capabilities to types defined at compile time.
 
-The performance penalty of Boost.Any creation and polymorphic nature, as well as its incapability to provide reliable compile-time type detection were the motivating factors for `boost::variant` authors. For that reason, variant is stack-based and provides reliable compile-time type detection and value extraction. There is a caveat - to enforce "never empty" requirement, variant may temporarily allocate storage on the heap to keep the old value for case of exception being thrown during assignment. Authors claim to have plans for alleviating this shortcoming.
+The performance penalty of Boost.Any creation and polymorphic nature, as well as its incapability to provide reliable compile-time type detection, were the motivating factors for `boost::variant` authors. For that reason, variant is stack-based and provides reliable compile-time type detection and value extraction. There is a caveat - to enforce "never empty" requirement, variant may temporarily allocate storage on the heap to keep the old value for the case when an exception being thrown during assignment. The authors claim to have plans for alleviating this shortcoming.
 
-Faced with a `boost::variant`, a naïve user may try something like this:
+Faced with a `boost::variant`, hoping it comes with built-in (or at least accompanying) type conversion facilities, a naïve user may try something like this:
 
 .Listing 4
 ----
@@ -220,7 +245,7 @@ string s = v; // compile error
 boost::get<std::string>(v); // throws
 ----
 
-While Boost.Variant offers slightly more cooperation than Boost.Any on the extraction side, it is not seamless nor without dangers - intuitive code won't compile while the next simplest way is brittle. Authors admit the shortcomings and brittleness of the above approach and provide visitor pattern as a vehicle to unleash the full strength of Boost.Variant. The visitor is created by inheriting from `boost::static_visitor<>` class template:
+While Boost.Variant offers slightly more cooperation than Boost.Any on the extraction side, it is not seamless or without dangers - intuitive code won't compile, while the next simplest way is brittle. Authors admit the shortcomings and brittleness of the above approach and provide a visitor mechanism as a vehicle to unleash the full strength of Boost.Variant. The visitor is created by inheriting from the `boost::static_visitor<>` class template:
 
 .Listing 5
 ----
@@ -244,7 +269,7 @@ int main()
 }
 ----
 
-In order to provide the type conversions, however, user must define a visitor per destination type, e.g. to facilitate the most common conversion between numbers and strings, the following minimal set of classes is needed:
+In order to provide the type conversions however, user must define a visitor per destination type, e.g. to facilitate the most common conversion between numbers and strings, the following minimal set of classes is needed:
 
 .Listing 6
 ----
@@ -291,7 +316,7 @@ struct aligned_storage_imp
 };
 ----
  
-Typically, depending on the size of the held type, there will be some extra space used (e.g. on 64-bit Win8/VS2012), variant<char> will occupy 8 bytes, while varian<std::string> will occupy 40:
+Typically, depending on the size of the held type, there will be some extra space used (e.g. on 64-bit Win8/VS2012), variant<char> will occupy 8 bytes, while variant<std::string> will occupy 40:
 
 .Listing 8
 ----
@@ -302,90 +327,35 @@ variant<double>: (8) 16
 variant<std::string>: (32) 40
 ----
 
-The most significant constraint of Boost.Variant is that it can only accept a predefined set of types. If a type is not explicitly listed in declaration (template instantiation) of the variant variable, that type can not be assigned to it. The never-empty guarantee creates some serious annoyances and there is some discussion going on as to whether it is a reasonable constraint ot start with. Default constructing variant as empty would aleviate this problem but it would also introduce problem of always having to deal with empty in the visitors.
+The most significant constraint of Boost.Variant is that it can only accept a predefined set of types. If a type is not explicitly listed in the declaration of the variant variable via a template instantiation, that type can not be assigned to it. The never-empty guarantee imposes some significant limitations and there is a discussion going on as to whether it is a reasonable constraint to start with. Default constructing variant as empty would alleviate this problem but it would also introduce the problem of always having to deal with empty in the visitors.
 
 
-=== Comparison between Boost.Variant and Boost.Any
+== Comparison between Boost.Variant and Boost.Any
 
 For easier understanding of the concepts behind the two classes described so far, `boost::any` is often compared to ``type-safe _void*_'' whereas `boost:variant` is compared to ``type-safe _union_''. While there are certainly similarities, this comparison should be taken cautiously.
 
 
-==== Boost.Variant advantages over Boost.Any:
+=== Boost.Variant advantages over Boost.Any:
 
 - guarantees the type of its content is one of a finite, user-specified set of types
 - provides compile-time checked generic visitation of its content (Boost.Any provides no visitation mechanism at all; even if it did, it would need to be checked at run-time)
 - offers an efficient, stack-based storage scheme (avoiding the overhead of dynamic allocation).
 
-==== Boost.Any advantages over Boost.Variant:
+=== Boost.Any advantages over Boost.Variant:
 
 - allows any type for its content, providing great flexibility
 - provides the no-throw guarantee of exception safety for its swap operation
-- no template meta-programming techniques (avoids potentially hard-to-read error messages and significant compile-time processor and memory demands).
+- no template meta-programming techniques, which avoids potentially hard-to-read error messages and significant compile-time processor and memory demands.
 
+== Conclusion
 
-== BoostTypeErasure
+The analysis of the available techniques, solutions ``ingredients'' and trade-offs for dynamic-language-like functionality within standard C$$++$$ was provided. Two existing solutions, `boost::variant` and `boost::any` were described and compared. In the next installment, we will look into more existing solutions with designs/funactionality comparisons and performance benchmarks. Stay tuned ...
 
-According to the author, type_erasure addresses the shortcomings of C++ runtime polymorphism, in particular its (1) intrusiveness, (2) dynamic memory management and (3) inability to apply multiple independent concepts to a single object. Library uses some advanced constructs such as concepts and template metaprogramming constructs from boost::mpl. Just like boost::variant specifies a set of types that can be contained within it at construction time, type_erasure specifies a set of operations that can be performed on it:
-
-.Listing 9
-----
-any<
-    mpl::vector<
-        copy_constructible<>,
-        typeid_<>,
-        incrementable<>,
-        ostreamable<>
-    >
-> x(10);
-++x; // incrementable
-std::cout << x << std::endl; // ostreamable
-----
-
-== Facebook folly::dynamic
-
-The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing-like classes. The class aims to relax the static typing constraints and it is very similar to Poco::Dynamic::Var.
-
-.Listing 10
-----
-dynamic twelve = 12; // creates a dynamic that holds an integer
-dynamic str = "string"; // yep, this one is an fbstring
-
-// A few other types.
-dynamic nul = nullptr;
-dynamic boolean = false;
-
-// Arrays can be initialized with brackets.
-dynamic array = { "array ", "of ", 4, " elements" };
-assert(array.size() == 4);
-dynamic emptyArray = {};
-assert(array.empty());
-
-// Maps from dynamics to dynamics are called objects.  The
-// dynamic::object constant is how you make an empty map from dynamics
-// to dynamics.
-dynamic map = dynamic::object;
-map["something"] = 12;
-map["another_something"] = map["something"] * 2;
-	
-// Dynamic objects may be intialized this way
-dynamic map2 = dynamic::object("something", 12)("another_something", 24);
-----
-
-Poco::Dynamic::Var
-------------------
-
-As mentioned earlier, Poco Dynamic::Var continues where boost::any stops - on the data extraction side.
-
-In this article, we will also look at other solutions for type erasure, look at their practical uses and compare their interfaces and implementations.
-
-Type safety is an important feature of C++; type erasure is a necessary technique for modern software development. Session examines and compares existing solutions to these important concerns.
- +
- +
 
 ''''
 .Credits
 
-I would like to thank Kevlin Henney for feedback and constructive discussions on the topic. Steven Watanabe provided valuable guidance on ``boost::type_erasure``. Andrei Alexandrescu provided valuable feedback and encouragement. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing. Any errors left are author's.
+Help in assembling and systematizing the information in this article came from numerous sources. Kevlin Henney provided feedback and constructive discussions on `boost::any` and the topic in general. Steven Watanabe provided valuable help and guidance on `boost::variant` and `boost::type_erasure`, which will be presented in the Part II. Günter Obiltschnig and Andrei Alexandrescu provided valuable feedback and encouragement. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing the information provided in this article.
  +
  +
 

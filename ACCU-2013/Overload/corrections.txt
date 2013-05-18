@@ -1,0 +1,213 @@
+http://tinyurl.com/cxml2lh
+
+> A very useful comparison of the various "variant" style types already out
+> there. I look forward to seeing the rest of it. Here are a few comments so
+> far:-
+>
+> + "to 2014 TS" - what's this? Not everyone knows about Technical
+> Corregdiguns (sp?) and the various parts of the standards process.
+>
+> + "On the stack" This might be just me but I find using the term "on the
+> stack" dodgy when you consider class members for an object allocated on the
+> heap. I presume "on the stack" also applies here?
+>
+> + "being those between numbers and strigs." typo - "strings"?
+>
+> + "the data extraction side is out of any's "scope of supply"" - An example
+> of the "supposed" problem would be useful for those of us who haven't used
+> boost::any.
+>
+> + "a naïve user may try something like this" - what is naive? Is it the fact
+> that it's an int value or a failed attempt at a conversion from int to a
+> string?
+>
+> + "while varian<std::string> will" - typo - missing "t".
+>
+> + "constraint ot start with" - typo - "to".
+>
+> + What is POCO? There is no mention so far about what POCO is, or at least
+> how it might differ from say Boost. Can you mix-and-match for instance or
+> easily migrate from say boost:any? Not sure how much is in scope here but at
+> least a few words would be good.
+>
+
+----------------------
+
+"C++ is statically"
++ "is a"
+"provides the data integrity safety net"
++ "provides a data integrity safety net"
+"Compiler is an indispensable"
++ "The compiler is an indispensable"
+"static nature of C++ provides runtime performance gain.".
+- Feel odd, how about "static nature of C++ avoids any runtime performance hit"?
+"“weakness” of the type system"
++ "“weaknesses” in the type system"
+"provides functinality"
++ "provides the functionality"
+"behavior"
+- "behaviour"
+"with addition of popular"
++ not sure "with the addition of popular..."?
+"need for relaxed type system"
++ "need for a relaxed type system"
+"Detour" box
+- better as just a "Justification for dynamic typing" section?
+"sepak"
++ "speak"
+"smoothen the rough edge "
++ "smooth the rough edges"
+"side-efect"
++ "side-effect"
+"could only make it to 2014 TS..."
++ expand - "has had to wait till the 2014 standard..." or just
+"...will not be standardized until 2017 at least" (and check this)
+"The original spark (boost::any port to POCO some years ago)
+triggering this systematic overview"
++ "The original spark triggering this systematic overview (the port of
+boost::any to POCO some years ago) "
+"But libraries are languages"
++ emphasise "are"
+"including pending "
++ "including the pending "
+"POCO" first mention
++ quick expand on what it is
+"takes us to rough waters"
++ "takes us into the rough waters"
+"from various aspects"
++ "from various angles"
+"by looking at concerns"
++ "by looking at the concerns"
+"the solutions and ingredients"
++ "the solutions, and the ingredients"
+"Within C++ memory"
++ "Within the C++ memory"
+"two distinct choices"
++ nitpick: is also the free store
+"More on this in Data Storage paragraph later"
++ just "More on this later"
+"Most frequently encountered operations"
++ "The most..."
+"there’s assignment and arithmetic, logical operators"
++" there’s assignment, arithmetic and logical operators"
+"strict requirement for explicit held type to"
++ "strict requirement to explicitly specify the  held type, to"
+"if user"
++ "if the user"
+"use existing or provide custom"
++ "use pre-existing or provide custom"
+"every time value"
++ "every time the value
+"this concern regards user experience"
++ "this concerns the user experience"
+"If user, in order to use a software component correctly, has to
+understand its implementation details,"
++ "If the user has to understand its implementation details in order
+to use a software component correctly,"
+"If value resides "
++ "If the value resides "
+"Due to type-independent "
++ "Due to the type-independent "
+"newly created entity"
++ "the newly created entity"
+"construct whatever the type "
++ construct the type "
+"in their due time."
++ "in due course.
+"optimization purposes, language"
++ "optimization purposes the language"
+"imposed by default"
++ "imposed by the default"
+"Since union must"
++ "Since a union must"
+"Since object is constructed"
+- "Since the object is constructed"
+"Programmer decides "
++"The programmer decides"
+"the limit in object size that should be created on the stack"
++ "the maximum object size that can be created on the stack"
+"as with the exception safety"
++ "as with exception safety"
+"is used indiscriminately, even when"
+- "exists even when"
+"are most frequently"
++ "are the most frequently"
+"can be performed"
++ "can often be performed"
+" they range from those not providing any (no pun intended)
+conversions, over those providing accompanying mechanisms for defining
+conversion facilities to those providing built-in conversions"
++ " they range from those not providing any (no pun intended), via
+those providing accompanying mechanisms for defining conversion
+facilities, to those providing built-in conversions"
+"The choice, therefore, is"
++"Therefore the choice is"
+"all or provide them and throw exception "
++ "all, or provide them and throw an exception "
+"There are aslo some pitfalls thereof"
++ "There are also some pitfalls"
+", in the context of said solutions presentation."
++ drop
+"often throwing exception"
++ "often throwing an exception"
+"in parent class and appropriately define it"
++ "in the parent class and appropriately override it"
+"inflict both size"
+- "inflict both a size"
+"complicated as well"
++ "complicated"
+"generic in the sense"
++ "in the sense"template syntax"
+"is waived template syntax"
++ ? "is via template syntax"?
+"unpleasing"
++ "displeasing". or just "avoid unpleasant angle"..
+"code for appropriate type"
++ "code for the appropriate type"
+"time, value"
++ "time, the value"
+"incur performance penalty due to heap allocation and size/performance
+penalty due to virtual inheritance"
++ "incur a performance penalty due to heap allocation, and a size and
+performance penalty due to virtual inheritance"
++ where's the virtual inheritance?
++ "any" is often not in "code" font.
+"detection were "
++ "detection, were "
+"for case of exception"
++ "for the case when an exception"
+"Authors claim"
++ "The authors claim"
+"naove"
+- "naive"
+"provide visitor pattern "
++"provide a visitor mechanism"
+"inheriting from"
++ "inheriting from the"
+"the type conversions, however, user"
++ "the type conversions however, the user"
+"If a type is not explicitly listed in declaration (template
+instantiation) of the variant variable, "
++ "If a type is not explicitly listed in the declaration of the
+variant variable via a template instantiation,"
+"aleviate"
++ "alleviate"
+"introduce problem of"
++ "introduce the problem of"
+"techniques (avoids"
++ "techniques, which avoids", and remove trailing ")"
+"type_erasure"
+- should be code font, smilar boost:: types
+"Library uses "
+-"The library uses "
+"In this article, we will"
+- ? The *next* article?
+
+"10. Poco::Dynamic::Var"
+- nthing much in the section - change to a "Next time" heading for the
+final paragraph, and expand on what will be in it
+
+"Type safety is an important feature of C++; type erasure is a
+necessary technique for modern software development. Session examines
+and compares existing solutions to these important concerns."
+- redundent paragraph?
