@@ -120,7 +120,7 @@ Since a _union_ must accomodate the largest type supported, it has to occupy at 
 
 Alignment:: 
 
-In practice, the amount of space needed is often more than largest _union_ member size due to platform-dependent alignment requirements. This means that, if only smaller types are used, sometimes there may be some space not effectively used but consumed nevertheless. Alignment requirements and details are beyond the scope of this writing.
+In practice, the amount of space needed is often more than largest _union_ member size due to platform-dependent alignment requirements. This means that, if only smaller types are used, sometimes there may be some space not effectively used but consumed nevertheless. Alignment requirements and details are beyond the scope of this writing but let us just mention here that it is a fairly complex topic, especially in the C$$++$$03 context; for details, see <<SUTTUNI>>.
 
 Destruction::
 
@@ -405,4 +405,5 @@ https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md[FOLLYDY] Fac
 [[CSHPDYN]]
 http://msdn.microsoft.com/en-us/library/dd264736.aspx[CSHPDYN] C# dynamic
 
-
+[[SUTTUNI]]
+http://www.informit.com/articles/article.aspx?p=360435[SUTTUNI] Construction Unions: A C$$++$$ Challenge
