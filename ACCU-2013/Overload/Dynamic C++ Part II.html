@@ -1,0 +1,1055 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.8" />
+<title><code>Dynamic C++, Part II</code></title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install(2);
+/*]]>*/
+</script>
+</head>
+<body class="article">
+<div id="header">
+<h1><code>Dynamic C++, Part II</code></h1>
+<span id="author">Alex Fabijanic &lt;alex@pocoproject.org&gt;, Richard Saunders &lt;&gt;</span><br />
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock">
+<div class="content">[Y]ou can&#8217;t build a system that is completely statically typed.</div>
+<div class="attribution">
+<em>Abstraction and Efficiency</em><br />
+&#8212; Bjarne Stroustrup
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>In this installment of the Dynamic C++ series of articles, we continue to explore the dynamic solutions in C++ language. We start with <strong>Boost</strong> <code>type_erasure</code><a href="#Boost.TypeErasure">[Boost.TypeErasure]</a>, a combination of <strong>Boost.Any</strong> <a href="#Boost.Any">[Boost.Any]</a> and <strong>Boost.Function</strong> <a href="#Boost.Function">[Boost.Function]</a>, addressing the C++ runtime polymorphism shortcomings. Next, we look into <code>Val</code>, a class at the heart of the <strong>PicklingTools</strong> library <a href="#PicklingTools">[PicklingTools]</a> aimed at interaction with Python environment. We conclude with <strong>Facebook</strong>'s <code>folly</code> library solution for interfacing the world of web and JSON from C++ - the <code>dynamic</code> class.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_boost_typeerasure">2. Boost.TypeErasure</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>According to the author, <code>type_erasure</code> is a generalization of <strong>Boost.Any</strong> and <strong>Boost.Function</strong> classes, allowing easy composition of arbitrary type erased operations; it addresses the shortcomings of C++ runtime polymorphism, in particular:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+intrusiveness
+</p>
+</li>
+<li>
+<p>
+dynamic memory management
+</p>
+</li>
+<li>
+<p>
+inability to apply multiple independent concepts to a single object.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Library uses some advanced constructs such as concepts and template metaprogramming constructs from <code>boost::mpl</code>. In a similar fashion like <code>boost::variant</code> specifying a set of types at construction time that can be contained at runtime, the <code>type_erasure</code> library specifies at construction time a set of operations that can be performed on it at runtime. This is achieved through a vector of <em>concepts</em> provided at object declaration site as shown in Listing 1 for an <code>incrementable</code> and <code>ostreamable</code> object.</p></div>
+<div class="listingblock">
+<div class="title">Listing 1</div>
+<div class="content">
+<pre><code>any&lt;
+    mpl::vector&lt;
+        copy_constructible&lt;&gt;,
+        typeid_&lt;&gt;,
+        incrementable&lt;&gt;,
+        ostreamable&lt;&gt;
+    &gt;
+&gt; x(10);
+++x; // incrementable
+std::cout &lt;&lt; x &lt;&lt; std::endl; // ostreamable</code></pre>
+</div></div>
+<div class="paragraph"><p>In the example, <code>copy_constructible</code> allows <em>copying</em> and <em>destruction</em> of the object, while <code>typeid_</code> provides <em>run-time type information</em> so that <code>any_cast</code> can be used; these effectively make <code>type_erasure any</code> equivalent to <code>any</code> <a href="#Boost.Any">[Boost.Any]</a>. Additonally, <code>incrementable</code> and <code>ostreamable</code> concepts are specified, allowing incrementing and streaming of the value <code>x</code>. Operations can have arguments, so replacing <code>incrementable</code> <em>concept</em> with <code>addable</code>, allows adding of two <code>any</code>'s. The functionality is brittle in a subtle way, though - while adding two values of different types will compile, unfortunately it results in undefined behavior at runtime. This problem can be alleviated by specifying <code>relaxed_match</code> concept (according to author, recently renamed to a more apropriate <code>match</code> name), which causes exception to be thrown. The proper way of dealing with this problem is using <em>placeholders</em>, as shown in Listing 2</p></div>
+<div class="listingblock">
+<div class="title">Listing 2</div>
+<div class="content">
+<pre><code>int array[5];
+
+typedef mpl::vector&lt;
+    copy_constructible&lt;_a&gt;,
+    copy_constructible&lt;_b&gt;,
+    typeid_&lt;_a&gt;,
+    addable&lt;_a, _b, _a&gt;
+&gt; requirements;
+
+tuple&lt;requirements, _a, _b&gt; t(&amp;array[0], 2);
+any&lt;requirements, _a&gt; x(get&lt; 0 &gt; (t) + get&lt; 1 &gt;(t));
+// x now holds array + 2</code></pre>
+</div></div>
+<div class="paragraph"><p>Placeholders are used extensively throughout the library. A placeholder is a substitute for a template parameter in a concept. The library automatically replaces all placeholders with the actual wrapped types.</p></div>
+<div class="paragraph"><p>Furthermore, <code>type_erasure</code> supports references (both <code>const</code> adn <code>non-const</code>), as well as user-defined <em>concepts</em>. Listing 3 demonstrates adding <code>stringable</code> <em>concept</em> to <code>type_erasure</code>, allowing a <code>to_string()</code> member function call syntax directly on an <em>integer</em> value wrapped in <code>any</code>.</p></div>
+<div class="listingblock">
+<div class="title">Listing 3</div>
+<div class="content">
+<pre><code>template&lt;class F, class T&gt;
+struct to_string
+{
+   // conversion function
+   static T apply(const F&amp; from, T&amp; to)
+   {
+     return to = NumberFormatter::format(from);
+   }
+};
+
+namespace boost {
+namespace type_erasure {
+   template&lt;class F, class T, class Base&gt; // binding
+   struct concept_interface&lt;::to_string&lt;F, T&gt;, Base, F&gt; : Base
+   {
+      typedef typename rebind_any&lt;Base, T&gt;::type IntType;
+      T to_string(IntType arg = IntType())
+      {
+          return call(::to_string&lt;C, T&gt;(), *this, arg);
+      }
+}; }
+
+typedef any&lt;to_string&lt;_self, std::string&gt;, _self&amp;&gt; stringable;
+int i = 123;
+stringable s(i);
+std::string str = s.to_string(); // s == "123"</code></pre>
+</div></div>
+<div class="paragraph"><p>Internally, a <code>void*</code> <em>pointer</em> points to the held heap-allocated value and a static equivalent of <em>virtual table</em> serves as a <em>binding</em> for attached operations as shown in Listing 4.</p></div>
+<div class="listingblock">
+<div class="title">Listing 4</div>
+<div class="content">
+<pre><code>// storage
+struct storage
+{
+    storage() {}
+    template&lt;class T&gt;
+    storage(const T&amp; arg) : data(new T(arg)) {}
+    void* data;
+};
+// binding of concept to actual type
+typedef ::boost::type_erasure::binding&lt;Concept&gt; table_type;
+// actual storage
+::boost::type_erasure::detail::storage data;
+                           table_type table;</code></pre>
+</div></div>
+<div class="paragraph"><p>Boost.Type erasure is an interesting and valuable "merger" of <code>any</code> and <code>function</code> features, providing dynamic-language like features within the confines of standard C++. Implementation is rather complex and use has some non-intuitive weak spots that can quickly get an inexperienced user in a serious trouble. A more robust interface (even if only with _typedef_s provided for most frequently used types) would greatly improve the usability and safety for less experienced users.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_picklingtools_val">3. PicklingTools Val</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The next reviewed solution to the dynamic typing problem is the <strong>PicklingTools</strong> Val. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication.  The PicklingTools evolved from a need allowing Python and C++ to share Python dictionaries across language boundaries.  Many modern applications are built using multiple languages: Python, C++, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C++, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid system, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the <em>currency</em> of many systems. The <strong>PicklingTools</strong> library solution focuses on the Python dictionary and C++.</p></div>
+<div class="paragraph"><p>While making Python dictionaries easy to express in C++ was not a primary goal, given how much users enjoyed the ease of use, the C++ PicklingTools embraced them wholeheartedly. The goal, then, became to make Python dictionaries as easy to express in C++ as it was in Python.</p></div>
+<div class="paragraph"><p>Consider the ease of a dynamic dictionary manipulation in Python shown in Listing 5.</p></div>
+<div class="listingblock">
+<div class="title">Listing 5</div>
+<div class="content">
+<pre><code># Create a Python literal
+&gt;&gt;&gt; d = { 'a': 1, 'b':2.2, 'c': { 'X':1, 'Y':[1,2,3]  }
+
+&gt;&gt;&gt; print d['a']    # lookup a single key: 'a' -&gt; 1
+&gt;&gt;&gt; d['b'] = 3.3     # insert into dict
+
+# Also easy to lookup/insert nested entities
+&gt;&gt;&gt; print d['c']['X']   # lookup nested key
+&gt;&gt;&gt; d['c']['Y'] = 0     # insert nested</code></pre>
+</div></div>
+<div class="paragraph"><p>Because C++ is a statically-typed language, it requires a compile-time type for all variables. <strong>PicklingTools</strong> use <code>Val</code> to indicate a dynamic value.</p></div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">The <code>Val</code> Name Rationale</div>
+<div class="paragraph"><p>Why Val and not something like dynamic or any? Three reasons:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Everything is, in general, passed by value
+</p>
+</li>
+<li>
+<p>
+PicklingTools encourage use of valgrind to help ensure quality
+</p>
+</li>
+<li>
+<p>
+Val is only three lettters, which is closer to a dynamic language with no letters for the type.
+</p>
+</li>
+</ul></div>
+</div></div>
+<div class="paragraph"><p>A side-by-side comparison of basic dynamic typing in Python and C++ using <code>Val</code> is shown in Listing 6.</p></div>
+<div class="listingblock">
+<div class="title">Listing 6</div>
+<div class="content">
+<pre><code># Python
+&gt;&gt;&gt; a = 1
+&gt;&gt;&gt; a = 2.2
+&gt;&gt;&gt; a = 'three'    # a takes three different types
+
+// C++
+Val a = 1;         // overload constructor
+a = 2.2;           // overload op=
+a = "three";</code></pre>
+</div></div>
+<div class="paragraph"><p>The <strong>PicklingTools</strong> Val is implemented as a <em>union</em> and a <em>type-tag</em>, where the value is constructed using <em>placement new</em> inside the <em>union</em>. The destructor has to manually notice which type to destruct (for non-POD types) and explicitly call the correct constructor. The Val is really just a dynamic container.</p></div>
+<div class="paragraph"><p>&lt;TODO&gt;</p></div>
+<div class="listingblock">
+<div class="title">Listing 7</div>
+<div class="content">
+<pre><code></code></pre>
+</div></div>
+<div class="paragraph"><p>&lt;/TODO&gt;</p></div>
+<div class="paragraph"><p>By design, the Val can only contain certain types, shown in Listing 8.</p></div>
+<div class="listingblock">
+<div class="title">Listing 8</div>
+<div class="content">
+<pre><code>// POD types
+int_1, int_u1, int_2, int_u2, int_4, int_u4, int_8, int_u8, real_4, real_8, complex_8, complex_16, size_t
+
+// Non-POD types
+string, None, Tab (like Python dictionary), Arr (like Python list)</code></pre>
+</div></div>
+<div class="paragraph"><p>There are no-user defined types by design. This allows library writers to concentrate on making the interface for C++ Python dictionaries as close to Python as possible without worrying about the problems generality brings.</p></div>
+<div class="paragraph"><p>Listing 9 shows how easy it is to construct a Val from basic types and get values out by means of user-defined conversion.</p></div>
+<div class="listingblock">
+<div class="title">Listing 9</div>
+<div class="content">
+<pre><code>// overload Val constructor on all supported types
+Val a = 1;
+Val b = 2.2;
+Val c = "three";
+
+int_u4 i = a;</code></pre>
+</div></div>
+<div class="paragraph"><p>Of course, overloaded cast operators direct calls are really just taking advantage of &#8220;syntactic sugar&#8221; for function calls as shown in Listing 10.</p></div>
+<div class="listingblock">
+<div class="title">Listing 10</div>
+<div class="content">
+<pre><code>Val v = 1;
+int_u4 i = v.operator int_u4();</code></pre>
+</div></div>
+<div class="paragraph"><p>The Val supports user-defined conversions for all basic types. If the conversion isn&#8217;t direct, then the user-defined conversions follow the <em>Principle of Least Surprise</em>: convert as C++ would, example shown in Listing 11.</p></div>
+<div class="listingblock">
+<div class="title">Listing 11</div>
+<div class="content">
+<pre><code>Val v = 3.14159265;
+int_u4 i4 = v; // Which conversion?  As C++ would:
+              //  int_u4 i4 = static_cast&lt;int_u4&gt;(3.14159265);</code></pre>
+</div></div>
+<div class="paragraph"><p>If the conversion doesn&#8217;t make sense, behavior is identical to that in Python - an exception is thrown, see Listing 12.</p></div>
+<div class="listingblock">
+<div class="title">Listing 12</div>
+<div class="content">
+<pre><code># Python
+&gt;&gt;&gt; a = 3.14159265
+&gt;&gt;&gt; i4 = int(a)           # converts to 3
+&gt;&gt;&gt; d = dict(a)           # Exception!  doesn't make sense to convert to dict
+
+// C++
+Val a = 3.14159265;
+int_u4 i4 = a;            // converts to 3
+Tab d = i4;               // Compile-time error, can't construct Tab from float</code></pre>
+</div></div>
+<div class="paragraph"><p>The Val provides the basic container to support dynamic dictionaries. The C++ Tab is equivalent to the Python dict (think <code>Tab == Table</code>). The keys of the C++ Tab are Vals and the values of the dictionary are Vals, allowing us to construct dynamic dictionaries as shown in Listing 13.</p></div>
+<div class="listingblock">
+<div class="title">Listing 13</div>
+<div class="content">
+<pre><code>   # Python
+   d = {'a':1, 'b':2.2, 'c':'three'}
+
+   // C++
+   Tab d = "{'a':1, 'b':2.2, 'c':'three'}";</code></pre>
+</div></div>
+<div class="paragraph"><p>Note that the C<code> literal is inside a string: we overload the constructor of the Tab to take a string which contains the literal. While C</code>11 has some great new literal constructs, it can&#8217;t quite mimic Python&#8217;s syntax.</p></div>
+<div class="paragraph"><p>Literal construction of a Python dictionary is supported using exactly the Python syntax: you can cut-and-paste the Python dictionary literal and paste it into the C++ quotes.  There is a little Python dictionary parser embedded in the Tab class so that it recognizes the same syntax.   Rather than invent a new syntax for literal construction, we leverage the well-know syntax of Python.</p></div>
+<div class="paragraph"><p>&lt;TODO&gt;</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_facebook_folly_dynamic">4. Facebook folly::dynamic</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing-like classes. The class aims to relax the static typing constraints, especially in the <em>JSON</em> format data manipulation scenarios.</p></div>
+<div class="listingblock">
+<div class="title">Listing</div>
+<div class="content">
+<pre><code>dynamic twelve = 12; // creates a dynamic that holds an integer
+dynamic str = "string"; // yep, this one is an fbstring
+
+// A few other types.
+dynamic nul = nullptr;
+dynamic boolean = false;
+
+// Arrays can be initialized with brackets.
+dynamic array = { "array ", "of ", 4, " elements" };
+assert(array.size() == 4);
+dynamic emptyArray = {};
+assert(array.empty());
+
+// Maps from dynamics to dynamics are called objects.  The
+// dynamic::object constant is how you make an empty map from dynamics
+// to dynamics.
+dynamic map = dynamic::object;
+map["something"] = 12;
+map["another_something"] = map["something"] * 2;
+
+// Dynamic objects may be intialized this way
+dynamic map2 = dynamic::object("something", 12)("another_something", 24);</code></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">5. Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>&lt;/TODO&gt;</p></div>
+<hr />
+<div class="paragraph"><div class="title">Credits</div><p>Steven Watanabe provided valuable advice on <code>boost::type_erasure</code>. Günter Obiltschnig and Andrei Alexandrescu provided valuable feedback and encouragement. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
+<br />
+<br /></p></div>
+<hr />
+<div class="paragraph" id="PicklingTools"><div class="title">References</div><p><a href="http://www.picklingtools.com">PICKLING</a> The PicklingTools Library</p></div>
+<div class="paragraph" id="POCO"><p><a href="http://pocoproject.org/">POCO</a> C++ Portable Components</p></div>
+<div class="paragraph" id="Stroustrup"><p><a href="http://www.artima.com/intv/abstreffi.html">Stroustrup</a> "Abstraction and Efficiency", A Conversation with Bjarne Stroustrup by Bill Venners, February 16, 2004</p></div>
+<div class="paragraph" id="ACCU13"><p><a href="http://www.slideshare.net/aleks-f/dynamic-caccu2013">ACCU13</a> "Dynamic C++", ACCU 2013 Conference</p></div>
+<div class="paragraph" id="Fabijanic08a"><p><a href="http://accu.org/index.php/journals/1502">ACCUDY1</a> "DynamicAny", Part I, Alex Fabijanic, ACCU Overload August 2008</p></div>
+<div class="paragraph" id="Fabijanic08b"><p><a href="http://accu.org/index.php/journals/1511">ACCUDY2</a> "DynamicAny", Part II, Alex Fabijanic, ACCU Overload October 2008</p></div>
+<div class="paragraph" id="Double.Conversion"><p><a href="http://code.google.com/p/double-conversion/">Double.Conversion</a> "Double-conversion library"</p></div>
+<div class="paragraph" id="Boost.Any"><p><a href="http://www.boost.org/doc/libs/1_53_0/doc/html/any.html">Boost.Any</a> Boost.Any</p></div>
+<div class="paragraph" id="Boost.Function"><p><a href="http://www.boost.org/doc/libs/1_53_0/doc/html/function.html">Boost.function</a> Boost.Function</p></div>
+<div class="paragraph" id="Folly"><p><a href="https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md">FOLLYDY</a> Facebook folly library, dynamic class</p></div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2013-06-23 20:58:43 CDT
+</div>
+</div>
+</body>
+</html>
