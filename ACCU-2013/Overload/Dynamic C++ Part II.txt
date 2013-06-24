@@ -1,24 +1,28 @@
 `Dynamic C++, Part II`
 ====================
-Alex Fabijanic <alex@pocoproject.org>
-:Author Initials: AF
+Alex Fabijanic <alex@pocoproject.org>, Richard Saunders <>
+:Author Initials: AF, RS
 :toc:
 :icons:
 :numbered:
-:website: http://pocoproject.org
+:website: http://pocoproject.org, http://www.picklingtools.com
 
-[quote, Robert Pirsig, Metaphysics of Quality]
-As to which is more important, Dynamic or static, both are absolutely essential, even when they are in conflict.
+[quote, Bjarne Stroustrup, Abstraction and Efficiency]
+[Y]ou can't build a system that is completely statically typed.
 
 == Introduction
 
-C$$++$$ is a statically-typed language. The static nature of the C$$++$$ type system provides a data integrity ``safety net''. The compiler is an indispensable runtime-surprise-prevention tool and the static nature of C$$++$$ provides runtime performance gain. Before we go any further, let's clarify the nomenclature - static typing here should not be confused with its close relative strong-typing, see <<NOTSTDY>> for details. It is precisely the ``weaknesses'' of the type system (in combination with polymorphism and templates) that provides the  functionality needed for dynamic-like behavior within a statically typed language such as C$$++$$. And there are circumstances calling for a ``softened'' type system, where a degree of performance sacrifice is acceptable and runtime type system relaxation desirable (or even necessary). To provide generic functionality automatically adaptable to different data types at runtime within the confines of standard C$$++$$, the runtime type detection system does not suffice - one has to resort to library solutions based on various techniques described later.
-	
-Data from external data sources arrives in a variety of types and brings along the need for efficient and transparent datatype conversion. The proliferation of web-based interfaces and databases with the addition of popular textual formats such as JSON and XML exacerbates the need for a relaxed type system with transparent and safe conversion facilities. This is a domain where dynamic languages have gained a significant footing. In order to clarify the premises for this writing, we must take a brief detour here ...
+In this installment of the Dynamic C$$++$$ series of articles, we continue to explore the dynamic solutions in C$$++$$ language. We start with *Boost* `type_erasure`<<Boost.TypeErasure>>, a combination of *Boost.Any* <<Boost.Any>> and *Boost.Function* <<Boost.Function>>, addressing the C$$++$$ runtime polymorphism shortcomings. Next, we look into `Val`, a class at the heart of the *PicklingTools* library <<PicklingTools>> aimed at interaction with Python environment. We conclude with *Facebook*'s `folly` library solution for interfacing the world of web and JSON from C$$++$$ - the `dynamic` class.
 
-== BoostTypeErasure
+== Boost.TypeErasure
 
-According to the author, type_erasure addresses the shortcomings of C++ runtime polymorphism, in particular its (1) intrusiveness, (2) dynamic memory management and (3) inability to apply multiple independent concepts to a single object. Library uses some advanced constructs such as concepts and template metaprogramming constructs from boost::mpl. Just like boost::variant specifies a set of types that can be contained within it at construction time, type_erasure specifies a set of operations that can be performed on it:
+According to the author, `type_erasure` is a generalization of *Boost.Any* and *Boost.Function* classes, allowing easy composition of arbitrary type erased operations; it addresses the shortcomings of C$$++$$ runtime polymorphism, in particular:
+
+- intrusiveness
+- dynamic memory management
+- inability to apply multiple independent concepts to a single object.
+
+Library uses some advanced constructs such as concepts and template metaprogramming constructs from `boost::mpl`. In a similar fashion like `boost::variant` specifying a set of types at construction time that can be contained at runtime, the `type_erasure` library specifies at construction time a set of operations that can be performed on it at runtime. This is achieved through a vector of _concepts_ provided at object declaration site as shown in Listing 1 for an `incrementable` and `ostreamable` object.
 
 .Listing 1
 ----
@@ -34,11 +38,217 @@ any<
 std::cout << x << std::endl; // ostreamable
 ----
 
-== Facebook folly::dynamic
-
-The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing-like classes. The class aims to relax the static typing constraints and it is very similar to Poco::Dynamic::Var.
+In the example, `copy_constructible` allows _copying_ and _destruction_ of the object, while `typeid_` provides _run-time type information_ so that `any_cast` can be used; these effectively make `type_erasure any` equivalent to `any` <<Boost.Any>>. Additonally, `incrementable` and `ostreamable` concepts are specified, allowing incrementing and streaming of the value `x`. Operations can have arguments, so replacing `incrementable` _concept_ with `addable`, allows adding of two `any`'s. The functionality is brittle in a subtle way, though - while adding two values of different types will compile, unfortunately it results in undefined behavior at runtime. This problem can be alleviated by specifying `relaxed_match` concept (according to author, recently renamed to a more apropriate `match` name), which causes exception to be thrown. The proper way of dealing with this problem is using _placeholders_, as shown in Listing 2
 
 .Listing 2
+----
+int array[5];
+
+typedef mpl::vector<
+    copy_constructible<_a>,
+    copy_constructible<_b>,
+    typeid_<_a>,
+    addable<_a, _b, _a>
+> requirements;
+
+tuple<requirements, _a, _b> t(&array[0], 2);
+any<requirements, _a> x(get< 0 > (t) + get< 1 >(t));
+// x now holds array + 2
+----
+
+Placeholders are used extensively throughout the library. A placeholder is a substitute for a template parameter in a concept. The library automatically replaces all placeholders with the actual wrapped types.
+
+Furthermore, `type_erasure` supports references (both `const` adn `non-const`), as well as user-defined _concepts_. Listing 3 demonstrates adding `stringable` _concept_ to `type_erasure`, allowing a `to_string()` member function call syntax directly on an _integer_ value wrapped in `any`.
+
+.Listing 3
+----
+template<class F, class T>
+struct to_string
+{
+   // conversion function
+   static T apply(const F& from, T& to)
+   {
+     return to = NumberFormatter::format(from);
+   }
+};
+
+namespace boost {
+namespace type_erasure {
+   template<class F, class T, class Base> // binding
+   struct concept_interface<::to_string<F, T>, Base, F> : Base
+   {
+      typedef typename rebind_any<Base, T>::type IntType;
+      T to_string(IntType arg = IntType())
+      {
+          return call(::to_string<C, T>(), *this, arg);
+      }
+}; }
+
+typedef any<to_string<_self, std::string>, _self&> stringable;
+int i = 123;
+stringable s(i);
+std::string str = s.to_string(); // s == "123"
+----
+
+Internally, a `void*` _pointer_ points to the held heap-allocated value and a static equivalent of _virtual table_ serves as a _binding_ for attached operations as shown in Listing 4.
+
+.Listing 4
+----
+// storage
+struct storage
+{
+    storage() {}
+    template<class T>
+    storage(const T& arg) : data(new T(arg)) {}
+    void* data;
+};
+// binding of concept to actual type
+typedef ::boost::type_erasure::binding<Concept> table_type;
+// actual storage
+::boost::type_erasure::detail::storage data;
+                           table_type table;
+----
+
+Boost.Type erasure is an interesting and valuable "merger" of `any` and `function` features, providing dynamic-language like features within the confines of standard C++. Implementation is rather complex and use has some non-intuitive weak spots that can quickly get an inexperienced user in a serious trouble. A more robust interface (even if only with _typedef_s provided for most frequently used types) would greatly improve the usability and safety for less experienced users.
+
+
+== PicklingTools Val
+
+The next reviewed solution to the dynamic typing problem is the *PicklingTools* Val. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication.  The PicklingTools evolved from a need allowing Python and C$$++$$ to share Python dictionaries across language boundaries.  Many modern applications are built using multiple languages: Python, C$$++$$, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C$$++$$, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid system, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the _currency_ of many systems. The *PicklingTools* library solution focuses on the Python dictionary and C$$++$$.
+
+While making Python dictionaries easy to express in C$$++$$ was not a primary goal, given how much users enjoyed the ease of use, the C$$++$$ PicklingTools embraced them wholeheartedly. The goal, then, became to make Python dictionaries as easy to express in C$$++$$ as it was in Python.  
+
+Consider the ease of a dynamic dictionary manipulation in Python shown in Listing 5.
+
+.Listing 5
+----
+# Create a Python literal
+>>> d = { 'a': 1, 'b':2.2, 'c': { 'X':1, 'Y':[1,2,3]  }
+
+>>> print d['a']    # lookup a single key: 'a' -> 1
+>>> d['b'] = 3.3     # insert into dict
+
+# Also easy to lookup/insert nested entities
+>>> print d['c']['X']   # lookup nested key
+>>> d['c']['Y'] = 0     # insert nested
+----
+
+Because C++ is a statically-typed language, it requires a compile-time type for all variables. *PicklingTools* use `Val` to indicate a dynamic value. 
+
+.The `Val` Name Rationale
+*******************************
+Why Val and not something like dynamic or any? Three reasons:
+
+- Everything is, in general, passed by value
+- PicklingTools encourage use of valgrind to help ensure quality
+- Val is only three lettters, which is closer to a dynamic language with no letters for the type.
+*******************************
+
+A side-by-side comparison of basic dynamic typing in Python and C$$++$$ using `Val` is shown in Listing 6.
+
+.Listing 6
+----
+# Python
+>>> a = 1
+>>> a = 2.2
+>>> a = 'three'    # a takes three different types
+
+// C++
+Val a = 1;         // overload constructor 
+a = 2.2;           // overload op=
+a = "three";
+----
+
+The *PicklingTools* Val is implemented as a _union_ and a _type-tag_, where the value is constructed using _placement new_ inside the _union_. The destructor has to manually notice which type to destruct (for non-POD types) and explicitly call the correct constructor. The Val is really just a dynamic container.  
+
+<TODO>
+
+.Listing 7
+----
+----
+
+</TODO>
+
+By design, the Val can only contain certain types, shown in Listing 8.
+
+.Listing 8
+----
+// POD types
+int_1, int_u1, int_2, int_u2, int_4, int_u4, int_8, int_u8, real_4, real_8, complex_8, complex_16, size_t
+
+// Non-POD types
+string, None, Tab (like Python dictionary), Arr (like Python list)
+----
+
+There are no-user defined types by design. This allows library writers to concentrate on making the interface for C++ Python dictionaries as close to Python as possible without worrying about the problems generality brings.
+
+Listing 9 shows how easy it is to construct a Val from basic types and get values out by means of user-defined conversion.
+
+.Listing 9
+----
+// overload Val constructor on all supported types
+Val a = 1;     
+Val b = 2.2; 
+Val c = "three";
+
+int_u4 i = a;   
+----
+
+Of course, overloaded cast operators direct calls are really just taking advantage of ``syntactic sugar'' for function calls as shown in Listing 10.
+
+.Listing 10
+----
+Val v = 1;
+int_u4 i = v.operator int_u4();
+----
+
+The Val supports user-defined conversions for all basic types. If the conversion isn't direct, then the user-defined conversions follow the _Principle of Least Surprise_: convert as C$$++$$ would, example shown in Listing 11.
+
+.Listing 11
+----
+Val v = 3.14159265;
+int_u4 i4 = v; // Which conversion?  As C++ would:
+              //  int_u4 i4 = static_cast<int_u4>(3.14159265);
+----
+
+If the conversion doesn't make sense, behavior is identical to that in Python - an exception is thrown, see Listing 12.
+
+.Listing 12
+----
+# Python
+>>> a = 3.14159265
+>>> i4 = int(a)           # converts to 3
+>>> d = dict(a)           # Exception!  doesn't make sense to convert to dict
+
+// C++
+Val a = 3.14159265;
+int_u4 i4 = a;            // converts to 3
+Tab d = i4;               // Compile-time error, can't construct Tab from float
+----
+
+The Val provides the basic container to support dynamic dictionaries. The C++ Tab is equivalent to the Python dict (think `Tab == Table`). The keys of the C$$++$$ Tab are Vals and the values of the dictionary are Vals, allowing us to construct dynamic dictionaries as shown in Listing 13.
+
+.Listing 13
+----
+   # Python
+   d = {'a':1, 'b':2.2, 'c':'three'}
+
+   // C++
+   Tab d = "{'a':1, 'b':2.2, 'c':'three'}";
+----
+
+Note that the C++ literal is inside a string: we overload the constructor of the Tab to take a string which contains the literal. While C++11 has some great new literal constructs, it can't quite mimic Python's syntax.
+
+Literal construction of a Python dictionary is supported using exactly the Python syntax: you can cut-and-paste the Python dictionary literal and paste it into the C++ quotes.  There is a little Python dictionary parser embedded in the Tab class so that it recognizes the same syntax.   Rather than invent a new syntax for literal construction, we leverage the well-know syntax of Python.
+
+
+<TODO>
+
+== Facebook folly::dynamic
+
+The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing-like classes. The class aims to relax the static typing constraints, especially in the _JSON_ format data manipulation scenarios. 
+
+.Listing
 ----
 dynamic twelve = 12; // creates a dynamic that holds an integer
 dynamic str = "string"; // yep, this one is an fbstring
@@ -64,68 +274,50 @@ map["another_something"] = map["something"] * 2;
 dynamic map2 = dynamic::object("something", 12)("another_something", 24);
 ----
 
-Poco::Dynamic::Var
-------------------
+== Conclusion
 
-As mentioned earlier, Poco Dynamic::Var continues where boost::any stops - on the data extraction side.
+</TODO>
 
-In this article, we will also look at other solutions for type erasure, look at their practical uses and compare their interfaces and implementations.
-
-Type safety is an important feature of C++; type erasure is a necessary technique for modern software development. Session examines and compares existing solutions to these important concerns.
- +
- +
 
 ''''
 .Credits
 
-I would like to thank Kevlin Henney for feedback and constructive discussions on the topic. Steven Watanabe provided valuable advice on `boost::type_erasure`. Günter Obiltschnig and Andrei Alexandrescu provided valuable feedback and encouragement. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing. Any errors left are author's.
+Steven Watanabe provided valuable advice on `boost::type_erasure`. Günter Obiltschnig and Andrei Alexandrescu provided valuable feedback and encouragement. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
  +
  +
-
-''''
-[[NOTSTDY]]
-.Static vs. Dynamic
-This classification has to do with timing of value-to-type attachment. Static means values are attached to types (``compiled'') at compile time. Dynamic means they are attached (``interpreted'') at runtime. Since C$$++$$ attaches values to types at compile, it follows that C$$++$$ is a statically typed language.
-
-.Strong vs. Weak
-This classification has to do with ``loopholes'' the programming language type system leaves open for its type system to be ``subverted''. Both C and C$$++$$ allow different types and pointers thereof to be cast to each other. While C$$++$$ is stricter than C, it is also backward compatible. But even without the C compatibility, C$$++$$ provides ways to subvert the type system and therefore can not be considered a strongly typed language. As a (non-exhaustive) example, void* and union disqualify C and C++ from strongly-typed qualification.
 
 ''''
 
 .References
 
-[[POCOPRJ]]
-http://pocoproject.org/[POCOPRJ] C$$++$$ Portable Components
+[[PicklingTools]]
+http://www.picklingtools.com[PICKLING] The PicklingTools Library
 
-[[ROBPIRS]]
-http://robertpirsig.org/MOQSummary.htm[ROBPIRS] "A brief summary of the Metaphysics of Quality", Robert Pirsig
+[[POCO]]
+http://pocoproject.org/[POCO] C$$++$$ Portable Components
 
-[[ACCUC13]]
-http://www.slideshare.net/aleks-f/dynamic-caccu2013[ACCUC13] "Dynamic C++", ACCU 2013 Conference
+[[Stroustrup]]
+http://www.artima.com/intv/abstreffi.html[Stroustrup] "Abstraction and Efficiency", A Conversation with Bjarne Stroustrup by Bill Venners, February 16, 2004
 
-[[ACCUDYN]]
-http://accu.org/index.php/journals/1502[ACCUDY1] "DynamicAny", Part I, Alex Fabijanic, ACCU Overload August 2008 +
+[[ACCU13]]
+http://www.slideshare.net/aleks-f/dynamic-caccu2013[ACCU13] "Dynamic C++", ACCU 2013 Conference
+
+[[Fabijanic08a]]
+http://accu.org/index.php/journals/1502[ACCUDY1] "DynamicAny", Part I, Alex Fabijanic, ACCU Overload August 2008
+
+[[Fabijanic08b]]
 http://accu.org/index.php/journals/1511[ACCUDY2] "DynamicAny", Part II, Alex Fabijanic, ACCU Overload October 2008
 
-[[DOUBCON]]
-http://code.google.com/p/double-conversion/[DOUBCON] "Double-conversion library"
+[[Double.Conversion]]
+http://code.google.com/p/double-conversion/[Double.Conversion] "Double-conversion library"
 
-[[BOOSANY]]
-http://www.boost.org/doc/libs/1_53_0/doc/html/any.html[BOOSANY] Boost.Any
+[[Boost.Any]]
+http://www.boost.org/doc/libs/1_53_0/doc/html/any.html[Boost.Any] Boost.Any
 
-[[POCOANY]]
-http://pocoproject.org/docs/Poco.Any.html[POCOANY] Poco::Any
+[[Boost.Function]]
+http://www.boost.org/doc/libs/1_53_0/doc/html/function.html[Boost.function] Boost.Function
 
-[[ANYCSTD]]
-http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3390.html[ANYCSTD] "Any Library Proposal", Revision 1, Kevlin Henney, Beman Dawes
-
-[[BOOSVAR]]
-http://www.boost.org/doc/libs/1_52_0/doc/html/variant.html[BOOSVAR] "Boost.Variant", Eric Friedman, Itay Maman
-
-[[FOLLYDY]]
+[[Folly]]
 https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md[FOLLYDY] Facebook folly library, dynamic class
-
-[[CSHPDYN]]
-http://msdn.microsoft.com/en-us/library/dd264736.aspx[CSHPDYN] C# dynamic
 
 
