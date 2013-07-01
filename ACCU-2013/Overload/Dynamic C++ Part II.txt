@@ -38,7 +38,7 @@ any<
 std::cout << x << std::endl; // ostreamable
 ----
 
-In the example, `copy_constructible` allows _copying_ and _destruction_ of the object, while `typeid_` provides _run-time type information_ so that `any_cast` can be used; these effectively make `type_erasure any` equivalent to `any` <<Boost.Any>>. Additonally, `incrementable` and `ostreamable` concepts are specified, allowing incrementing and streaming of the value `x`. Operations can have arguments, so replacing `incrementable` _concept_ with `addable`, allows adding of two `any`'s. The functionality is brittle in a subtle way, though - while adding two values of different types will compile, unfortunately it results in undefined behavior at runtime. This problem can be alleviated by specifying `relaxed_match` concept (according to author, recently renamed to a more apropriate `match` name), which causes exception to be thrown. The proper way of dealing with this problem is using _placeholders_, as shown in Listing 2
+In the example, `copy_constructible` allows _copying_ and _destruction_ of the object, while `typeid_` provides _run-time type information_ so that `any_cast` can be used; these effectively make `type_erasure any` equivalent to `any` <<Boost.Any>>. Additionally, `incrementable` and `ostreamable` concepts are specified, allowing incrementing and streaming of the value `x`. Operations can have arguments, so replacing `incrementable` _concept_ with `addable`, allows adding of two `any`'s. The functionality is brittle in a subtle way, though - while adding two values of different types will compile, unfortunately it results in undefined behavior at runtime. This problem can be alleviated by specifying `relaxed_match` concept (according to author, recently renamed to a more appropriate `relaxed` name), which causes exception to be thrown. The proper way of dealing with this problem is using _placeholders_, as shown in Listing 2
 
 .Listing 2
 ----
@@ -58,7 +58,7 @@ any<requirements, _a> x(get< 0 > (t) + get< 1 >(t));
 
 Placeholders are used extensively throughout the library. A placeholder is a substitute for a template parameter in a concept. The library automatically replaces all placeholders with the actual wrapped types.
 
-Furthermore, `type_erasure` supports references (both `const` adn `non-const`), as well as user-defined _concepts_. Listing 3 demonstrates adding `stringable` _concept_ to `type_erasure`, allowing a `to_string()` member function call syntax directly on an _integer_ value wrapped in `any`.
+Furthermore, `type_erasure` supports references (both `const` and `non-const`), as well as user-defined _concepts_. Listing 3 demonstrates adding `stringable` _concept_ to `type_erasure`, allowing a `to_string()` member function call syntax directly on an _integer_ value wrapped in `any`. Things can be simplified when implementation and interface are the same (i.e. a member of `type_erasure::any` called `to_string` calls a `to_string` member of the contained type), BOOST_TYPE_ERASURE_MEMBER ``shortcut'' macro can be used.
 
 .Listing 3
 ----
@@ -114,7 +114,7 @@ Boost.Type erasure is an interesting and valuable "merger" of `any` and `functio
 
 == PicklingTools Val
 
-The next reviewed solution to the dynamic typing problem is the *PicklingTools* Val. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication.  The PicklingTools evolved from a need allowing Python and C$$++$$ to share Python dictionaries across language boundaries.  Many modern applications are built using multiple languages: Python, C$$++$$, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C$$++$$, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid system, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the _currency_ of many systems. The *PicklingTools* library solution focuses on the Python dictionary and C$$++$$.
+The next reviewed solution to the dynamic typing problem is the *PicklingTools* <<PicklingTools>> Val. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication.  The PicklingTools evolved from a need allowing Python and C$$++$$ to share Python dictionaries across language boundaries.  Many modern applications are built using multiple languages: Python, C$$++$$, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C$$++$$, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid system, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the _currency_ of many systems. The *PicklingTools* library solution focuses on the Python dictionary and C$$++$$.
 
 While making Python dictionaries easy to express in C$$++$$ was not a primary goal, given how much users enjoyed the ease of use, the C$$++$$ PicklingTools embraced them wholeheartedly. The goal, then, became to make Python dictionaries as easy to express in C$$++$$ as it was in Python.  
 
@@ -137,11 +137,11 @@ Because C++ is a statically-typed language, it requires a compile-time type for 
 
 .The `Val` Name Rationale
 *******************************
-Why Val and not something like dynamic or any? Three reasons:
+Why _Val_ and not something like dynamic or any? Three reasons:
 
 - Everything is, in general, passed by value
 - PicklingTools encourage use of valgrind to help ensure quality
-- Val is only three lettters, which is closer to a dynamic language with no letters for the type.
+- Val is only three letters, which is closer to a dynamic language with no letters for the type.
 *******************************
 
 A side-by-side comparison of basic dynamic typing in Python and C$$++$$ using `Val` is shown in Listing 6.
@@ -159,25 +159,53 @@ a = 2.2;           // overload op=
 a = "three";
 ----
 
-The *PicklingTools* Val is implemented as a _union_ and a _type-tag_, where the value is constructed using _placement new_ inside the _union_. The destructor has to manually notice which type to destruct (for non-POD types) and explicitly call the correct constructor. The Val is really just a dynamic container.  
-
-<TODO>
+The *PicklingTools* Val is implemented as a _union_ and a _type-tag_, where the value is constructed using _placement new_ inside the _union_. The destructor has to manually notice which type to destruct (for non-POD types) and explicitly call the correct constructor. The Val is really just a dynamic container, with storage as shown in Listing 7.  
 
 .Listing 7
 ----
+struct Val
+{
+  // Flags: the ascii typetag, subtype for arrays,
+  char tag;
+  char subtype;
+  char isproxy;
+  char pad;
+    
+  Allocator *a;  // if using shared memory or special allocator
+
+  union
+  {
+    int_1  s;      // type tag 's'
+    int_u1 S;      // type tag 'S'
+    int_2  i;      // type tag 'i'
+    int_u2 I;      // type tag 'I'
+    int_4  l;      // type tag 'l'
+    int_u4 L;      // type tag 'L'
+    int_8  x;      // type tag 'x'
+    int_u8 X;      // type tag 'X'
+    real_4 f;      // type tag 'f'
+    real_8 d;      // type tag 'd'
+    complex_8  F;  // type tag 'F'
+    complex_16 D;  // type tag 'D'
+    char t[sizeof(Tab)]; // type tag 't', usually 32
+    char n[sizeof(Arr)]; // type tag 'n', usually 32
+  } u;
+};
 ----
 
-</TODO>
-
-By design, the Val can only contain certain types, shown in Listing 8.
+As can be concluded from Listing 7, by design `Val` can only contain certain types, shown in Listing 8.
 
 .Listing 8
 ----
 // POD types
-int_1, int_u1, int_2, int_u2, int_4, int_u4, int_8, int_u8, real_4, real_8, complex_8, complex_16, size_t
+int_1, int_u1, int_2, int_u2, 
+int_4, int_u4, int_8, int_u8, 
+real_4, real_8, 
+complex_8, complex_16, size_t
 
 // Non-POD types
-string, None, Tab (like Python dictionary), Arr (like Python list)
+string, None, Tab (like Python dictionary), 
+Arr (like Python list)
 ----
 
 There are no-user defined types by design. This allows library writers to concentrate on making the interface for C++ Python dictionaries as close to Python as possible without worrying about the problems generality brings.
@@ -190,11 +218,11 @@ Listing 9 shows how easy it is to construct a Val from basic types and get value
 Val a = 1;     
 Val b = 2.2; 
 Val c = "three";
-
+// Get a value out via user-defined conversions
 int_u4 i = a;   
 ----
 
-Of course, overloaded cast operators direct calls are really just taking advantage of ``syntactic sugar'' for function calls as shown in Listing 10.
+The user-defined conversions and overloading" are syntactic sugar. Of course, overloaded cast operators direct calls are really just taking advantage of ``syntactic sugar'' for function calls as shown in Listing 10.
 
 .Listing 10
 ----
@@ -208,7 +236,7 @@ The Val supports user-defined conversions for all basic types. If the conversion
 ----
 Val v = 3.14159265;
 int_u4 i4 = v; // Which conversion?  As C++ would:
-              //  int_u4 i4 = static_cast<int_u4>(3.14159265);
+               //  int_u4 i4 = static_cast<int_u4>(3.14159265);
 ----
 
 If the conversion doesn't make sense, behavior is identical to that in Python - an exception is thrown, see Listing 12.
@@ -226,63 +254,147 @@ int_u4 i4 = a;            // converts to 3
 Tab d = i4;               // Compile-time error, can't construct Tab from float
 ----
 
-The Val provides the basic container to support dynamic dictionaries. The C++ Tab is equivalent to the Python dict (think `Tab == Table`). The keys of the C$$++$$ Tab are Vals and the values of the dictionary are Vals, allowing us to construct dynamic dictionaries as shown in Listing 13.
+The `Val` provides the basic container to support dynamic dictionaries. The C++ `Tab` is equivalent to the Python `dict` (think `Tab == Table`). The keys of the C$$++$$ Tab, as well as the values of the dictionary are `Val`s, allowing us to construct dynamic dictionaries as shown in Listing 13.
 
 .Listing 13
 ----
-   # Python
-   d = {'a':1, 'b':2.2, 'c':'three'}
+# Python
+d = {'a':1, 'b':2.2, 'c':'three'}
 
-   // C++
-   Tab d = "{'a':1, 'b':2.2, 'c':'three'}";
+// C++
+Tab d = "{'a':1, 'b':2.2, 'c':'three'}";
 ----
 
-Note that the C++ literal is inside a string: we overload the constructor of the Tab to take a string which contains the literal. While C++11 has some great new literal constructs, it can't quite mimic Python's syntax.
+Note that the C$$++$$ literal is inside a string: the library overloads the constructor of the Tab to take a string which contains the literal. While C++11 has some great new literal constructs, it can't quite mimic Python's syntax.
 
-Literal construction of a Python dictionary is supported using exactly the Python syntax: you can cut-and-paste the Python dictionary literal and paste it into the C++ quotes.  There is a little Python dictionary parser embedded in the Tab class so that it recognizes the same syntax.   Rather than invent a new syntax for literal construction, we leverage the well-know syntax of Python.
+Literal construction of a Python dictionary is supported using exactly the Python syntax: you can cut-and-paste the Python dictionary literal and paste it into the C++ quotes.  There is a little Python dictionary parser embedded in the Tab class so that it recognizes the same syntax.   Rather than invent a new syntax for literal construction, library leverage the well-known Python syntax.
 
 
-<TODO>
+== Facebook `folly::dynamic`
 
-== Facebook folly::dynamic
+The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing classes. The class aims to relax the static typing constraints, especially in the _JSON_ format data manipulation scenarios; it provides a runtime dynamically typed value for C++, similar to the way languages with runtime type systems work (e.g. Python). It can hold types from a predetermined set (ints, bools, arrays of other dynamics, etc), similar to `boost::variant` and PicklingTools `Val`, but the syntax is intended to be more akin to using the native type directly.
 
-The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing-like classes. The class aims to relax the static typing constraints, especially in the _JSON_ format data manipulation scenarios. 
+An example of creating a `dynamic` holding most common types is shown in listing 14. Strings are stored internally as `fbstring`, the Facebook _drop-in_ replacement for `std::string`.
 
-.Listing
+.Listing 14
 ----
-dynamic twelve = 12; // creates a dynamic that holds an integer
-dynamic str = "string"; // yep, this one is an fbstring
-
-// A few other types.
+dynamic twelve = 12;
+dynamic str = "string"; // fbstring
 dynamic nul = nullptr;
 dynamic boolean = false;
+----
 
-// Arrays can be initialized with brackets.
+.Facebook String Flavor
+*******************************
+Facebook `folly::fbstring` is a drop-in replacement for std::string, providing the benefit of significantly increased performance on virtually all important primitives. This is achieved by using a three-tiered storage strategy and cooperating with the memory allocator; fbstring is designed to detect use of jemalloc <<jemalloc>> and cooperate with it to significantly improve speed and memory usage.
+
+[underline]#Storage strategies#
+
+- Small strings ($$<=$$23 chars) are stored in-situ without memory allocation.
+- Medium strings (24-255 chars) are stored in malloc-allocated memory and copied eagerly.
+- Large strings (>255 chars) are stored in `malloc`-ated memory and copied lazily.
+
+[underline]#Implementation highlights#
+
+- Compatible with `std::string`.
+- Thread-safe, reference-counted copy-on-write for large (>255 chars) strings.
+- Uses `malloc` instead of allocators.
+- Jemalloc-friendly
+- The `find()` is implemented using simplified Boyer-Moore algorithm. 
+- Offers conversions to and from `std::string`.
+
+Supported architectures are x32 and x64; porting `fbstring` to big-endian architectures would require changes.
+*******************************
+
+Library extensively uses C++11 features for both speed and syntactic advantages. For example, as shown in Listing 15, arrays can be initialized with _initializer lists_. This particular feature, however, also imposes a  limitation - `dynamic` has no default constructor. Rationale for this design decision is due to the standard requirement for the expression `dynamic d = {}` to call default constructor. The conflict arises in the default construction either having to result in `d.isArray()` (a) being `false` for the expression `dynamic d = {}` or (b) being true for `dynamic d`. The solution the authors of `folly::dynamic` deemed most appropriate is to entirely disallow the default construction.
+
+.Listing 15
+----
 dynamic array = { "array ", "of ", 4, " elements" };
 assert(array.size() == 4);
 dynamic emptyArray = {};
 assert(array.empty());
+----
 
-// Maps from dynamics to dynamics are called objects.  The
-// dynamic::object constant is how you make an empty map from dynamics
-// to dynamics.
+Maps from dynamics to dynamics are called objects. As shown in Listing 16, the `dynamic::object` constant is how an empty map from dynamics to dynamics is created. Same listing also shows how `dynamic` objects can be created by using `object::operator()`.
+
+.Listing 16
+----
 dynamic map = dynamic::object;
 map["something"] = 12;
 map["another_something"] = map["something"] * 2;
-	
-// Dynamic objects may be intialized this way
+
 dynamic map2 = dynamic::object("something", 12)("another_something", 24);
 ----
 
+The internal `dynamic` storage is shown in Listing 17. Types that can be held are: `null`, `Array`, `bool`, `double`, `integer` (64-bit), `Object` and `String`.
+
+.Listing 17
+----
+enum Type
+{
+  NULLT,
+  ARRAY,
+  BOOL,
+  DOUBLE,
+  INT64,
+  OBJECT,
+  STRING,
+};
+
+// ...
+
+Type type_;
+  
+union Data 
+{
+  explicit Data() : nul(nullptr) {}
+
+  void* nul; // void* used instead of std::nullptr_t due to gcc bug
+  Array array;
+  bool boolean;
+  double doubl;
+  int64_t integer;
+  fbstring string;
+
+  typename std::aligned_storage<
+    sizeof(std::unordered_map<int,int>),
+    alignof(std::unordered_map<int,int>)
+  >::type objectBuffer;
+} u_;
+----
+
+Examples of object and string construction are shown in Listing 18. Most notably, `ObjectImpl` is not a mere typedef but inherits from hash map; the reason for this to avoid undefined behavior of parameterizing `std::unordered_map` with an incomplete type.
+
+.Listing 18
+----
+struct dynamic::ObjectImpl : std::unordered_map<dynamic, dynamic> {};
+
+// ...
+
+inline dynamic::dynamic(ObjectMaker (*)())
+  : type_(OBJECT)
+{
+  new (getAddress<ObjectImpl>()) ObjectImpl();
+}
+
+inline dynamic::dynamic(char const* s)
+  : type_(STRING)
+{
+  new (&u_.string) fbstring(s);
+}
+
+
+----
+ 
 == Conclusion
 
-</TODO>
-
+In this installment, we reviewed three C$$++$$ dynamic typing solutions: *Boost* `type_erasure`, *PicklingTools* `Val` and *Facebook* `folly::dynamic.
 
 ''''
 .Credits
 
-Steven Watanabe provided valuable advice on `boost::type_erasure`. Günter Obiltschnig and Andrei Alexandrescu provided valuable feedback and encouragement. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
+Steven Watanabe provided valuable advice on `boost::type_erasure`. Andrei Alexandrescu and other Facebook employees provided valuable feedback. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
  +
  +
 
@@ -317,7 +429,14 @@ http://www.boost.org/doc/libs/1_53_0/doc/html/any.html[Boost.Any] Boost.Any
 [[Boost.Function]]
 http://www.boost.org/doc/libs/1_53_0/doc/html/function.html[Boost.function] Boost.Function
 
-[[Folly]]
-https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md[FOLLYDY] Facebook folly library, dynamic class
+[[Folly.FBString]]
+https://github.com/facebook/folly/blob/master/folly/docs/FBString.md[Folly.FBString]
+Facebook folly library, fbstring class
 
+[[Folly.Dynamic]]
+https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md[Folly.Dynamic]
+Facebook folly library, dynamic class
 
+[[jemalloc]]
+http://www.canonware.com/jemalloc/[jemalloc]
+A general-purpose scalable concurrent malloc(3) implementation.

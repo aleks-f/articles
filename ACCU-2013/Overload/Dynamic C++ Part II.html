@@ -791,7 +791,7 @@ inability to apply multiple independent concepts to a single object.
 ++x; // incrementable
 std::cout &lt;&lt; x &lt;&lt; std::endl; // ostreamable</code></pre>
 </div></div>
-<div class="paragraph"><p>In the example, <code>copy_constructible</code> allows <em>copying</em> and <em>destruction</em> of the object, while <code>typeid_</code> provides <em>run-time type information</em> so that <code>any_cast</code> can be used; these effectively make <code>type_erasure any</code> equivalent to <code>any</code> <a href="#Boost.Any">[Boost.Any]</a>. Additonally, <code>incrementable</code> and <code>ostreamable</code> concepts are specified, allowing incrementing and streaming of the value <code>x</code>. Operations can have arguments, so replacing <code>incrementable</code> <em>concept</em> with <code>addable</code>, allows adding of two <code>any</code>'s. The functionality is brittle in a subtle way, though - while adding two values of different types will compile, unfortunately it results in undefined behavior at runtime. This problem can be alleviated by specifying <code>relaxed_match</code> concept (according to author, recently renamed to a more apropriate <code>match</code> name), which causes exception to be thrown. The proper way of dealing with this problem is using <em>placeholders</em>, as shown in Listing 2</p></div>
+<div class="paragraph"><p>In the example, <code>copy_constructible</code> allows <em>copying</em> and <em>destruction</em> of the object, while <code>typeid_</code> provides <em>run-time type information</em> so that <code>any_cast</code> can be used; these effectively make <code>type_erasure any</code> equivalent to <code>any</code> <a href="#Boost.Any">[Boost.Any]</a>. Additionally, <code>incrementable</code> and <code>ostreamable</code> concepts are specified, allowing incrementing and streaming of the value <code>x</code>. Operations can have arguments, so replacing <code>incrementable</code> <em>concept</em> with <code>addable</code>, allows adding of two <code>any</code>'s. The functionality is brittle in a subtle way, though - while adding two values of different types will compile, unfortunately it results in undefined behavior at runtime. This problem can be alleviated by specifying <code>relaxed_match</code> concept (according to author, recently renamed to a more appropriate <code>relaxed</code> name), which causes exception to be thrown. The proper way of dealing with this problem is using <em>placeholders</em>, as shown in Listing 2</p></div>
 <div class="listingblock">
 <div class="title">Listing 2</div>
 <div class="content">
@@ -809,7 +809,7 @@ any&lt;requirements, _a&gt; x(get&lt; 0 &gt; (t) + get&lt; 1 &gt;(t));
 // x now holds array + 2</code></pre>
 </div></div>
 <div class="paragraph"><p>Placeholders are used extensively throughout the library. A placeholder is a substitute for a template parameter in a concept. The library automatically replaces all placeholders with the actual wrapped types.</p></div>
-<div class="paragraph"><p>Furthermore, <code>type_erasure</code> supports references (both <code>const</code> adn <code>non-const</code>), as well as user-defined <em>concepts</em>. Listing 3 demonstrates adding <code>stringable</code> <em>concept</em> to <code>type_erasure</code>, allowing a <code>to_string()</code> member function call syntax directly on an <em>integer</em> value wrapped in <code>any</code>.</p></div>
+<div class="paragraph"><p>Furthermore, <code>type_erasure</code> supports references (both <code>const</code> and <code>non-const</code>), as well as user-defined <em>concepts</em>. Listing 3 demonstrates adding <code>stringable</code> <em>concept</em> to <code>type_erasure</code>, allowing a <code>to_string()</code> member function call syntax directly on an <em>integer</em> value wrapped in <code>any</code>. Things can be simplified when implementation and interface are the same (i.e. a member of <code>type_erasure::any</code> called <code>to_string</code> calls a <code>to_string</code> member of the contained type), BOOST_TYPE_ERASURE_MEMBER &#8220;shortcut&#8221; macro can be used.</p></div>
 <div class="listingblock">
 <div class="title">Listing 3</div>
 <div class="content">
@@ -864,7 +864,7 @@ typedef ::boost::type_erasure::binding&lt;Concept&gt; table_type;
 <div class="sect1">
 <h2 id="_picklingtools_val">3. PicklingTools Val</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The next reviewed solution to the dynamic typing problem is the <strong>PicklingTools</strong> Val. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication.  The PicklingTools evolved from a need allowing Python and C++ to share Python dictionaries across language boundaries.  Many modern applications are built using multiple languages: Python, C++, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C++, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid system, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the <em>currency</em> of many systems. The <strong>PicklingTools</strong> library solution focuses on the Python dictionary and C++.</p></div>
+<div class="paragraph"><p>The next reviewed solution to the dynamic typing problem is the <strong>PicklingTools</strong> <a href="#PicklingTools">[PicklingTools]</a> Val. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication.  The PicklingTools evolved from a need allowing Python and C++ to share Python dictionaries across language boundaries.  Many modern applications are built using multiple languages: Python, C++, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C++, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid system, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the <em>currency</em> of many systems. The <strong>PicklingTools</strong> library solution focuses on the Python dictionary and C++.</p></div>
 <div class="paragraph"><p>While making Python dictionaries easy to express in C++ was not a primary goal, given how much users enjoyed the ease of use, the C++ PicklingTools embraced them wholeheartedly. The goal, then, became to make Python dictionaries as easy to express in C++ as it was in Python.</p></div>
 <div class="paragraph"><p>Consider the ease of a dynamic dictionary manipulation in Python shown in Listing 5.</p></div>
 <div class="listingblock">
@@ -884,7 +884,7 @@ typedef ::boost::type_erasure::binding&lt;Concept&gt; table_type;
 <div class="sidebarblock">
 <div class="content">
 <div class="title">The <code>Val</code> Name Rationale</div>
-<div class="paragraph"><p>Why Val and not something like dynamic or any? Three reasons:</p></div>
+<div class="paragraph"><p>Why <em>Val</em> and not something like dynamic or any? Three reasons:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -898,7 +898,7 @@ PicklingTools encourage use of valgrind to help ensure quality
 </li>
 <li>
 <p>
-Val is only three lettters, which is closer to a dynamic language with no letters for the type.
+Val is only three letters, which is closer to a dynamic language with no letters for the type.
 </p>
 </li>
 </ul></div>
@@ -917,23 +917,52 @@ Val a = 1;         // overload constructor
 a = 2.2;           // overload op=
 a = "three";</code></pre>
 </div></div>
-<div class="paragraph"><p>The <strong>PicklingTools</strong> Val is implemented as a <em>union</em> and a <em>type-tag</em>, where the value is constructed using <em>placement new</em> inside the <em>union</em>. The destructor has to manually notice which type to destruct (for non-POD types) and explicitly call the correct constructor. The Val is really just a dynamic container.</p></div>
-<div class="paragraph"><p>&lt;TODO&gt;</p></div>
+<div class="paragraph"><p>The <strong>PicklingTools</strong> Val is implemented as a <em>union</em> and a <em>type-tag</em>, where the value is constructed using <em>placement new</em> inside the <em>union</em>. The destructor has to manually notice which type to destruct (for non-POD types) and explicitly call the correct constructor. The Val is really just a dynamic container, with storage as shown in Listing 7.</p></div>
 <div class="listingblock">
 <div class="title">Listing 7</div>
 <div class="content">
-<pre><code></code></pre>
+<pre><code>struct Val
+{
+  // Flags: the ascii typetag, subtype for arrays,
+  char tag;
+  char subtype;
+  char isproxy;
+  char pad;
+
+  Allocator *a;  // if using shared memory or special allocator
+
+  union
+  {
+    int_1  s;      // type tag 's'
+    int_u1 S;      // type tag 'S'
+    int_2  i;      // type tag 'i'
+    int_u2 I;      // type tag 'I'
+    int_4  l;      // type tag 'l'
+    int_u4 L;      // type tag 'L'
+    int_8  x;      // type tag 'x'
+    int_u8 X;      // type tag 'X'
+    real_4 f;      // type tag 'f'
+    real_8 d;      // type tag 'd'
+    complex_8  F;  // type tag 'F'
+    complex_16 D;  // type tag 'D'
+    char t[sizeof(Tab)]; // type tag 't', usually 32
+    char n[sizeof(Arr)]; // type tag 'n', usually 32
+  } u;
+};</code></pre>
 </div></div>
-<div class="paragraph"><p>&lt;/TODO&gt;</p></div>
-<div class="paragraph"><p>By design, the Val can only contain certain types, shown in Listing 8.</p></div>
+<div class="paragraph"><p>As can be concluded from Listing 7, by design <code>Val</code> can only contain certain types, shown in Listing 8.</p></div>
 <div class="listingblock">
 <div class="title">Listing 8</div>
 <div class="content">
 <pre><code>// POD types
-int_1, int_u1, int_2, int_u2, int_4, int_u4, int_8, int_u8, real_4, real_8, complex_8, complex_16, size_t
+int_1, int_u1, int_2, int_u2,
+int_4, int_u4, int_8, int_u8,
+real_4, real_8,
+complex_8, complex_16, size_t
 
 // Non-POD types
-string, None, Tab (like Python dictionary), Arr (like Python list)</code></pre>
+string, None, Tab (like Python dictionary),
+Arr (like Python list)</code></pre>
 </div></div>
 <div class="paragraph"><p>There are no-user defined types by design. This allows library writers to concentrate on making the interface for C++ Python dictionaries as close to Python as possible without worrying about the problems generality brings.</p></div>
 <div class="paragraph"><p>Listing 9 shows how easy it is to construct a Val from basic types and get values out by means of user-defined conversion.</p></div>
@@ -944,10 +973,10 @@ string, None, Tab (like Python dictionary), Arr (like Python list)</code></pre>
 Val a = 1;
 Val b = 2.2;
 Val c = "three";
-
+// Get a value out via user-defined conversions
 int_u4 i = a;</code></pre>
 </div></div>
-<div class="paragraph"><p>Of course, overloaded cast operators direct calls are really just taking advantage of &#8220;syntactic sugar&#8221; for function calls as shown in Listing 10.</p></div>
+<div class="paragraph"><p>The user-defined conversions and overloading" are syntactic sugar. Of course, overloaded cast operators direct calls are really just taking advantage of &#8220;syntactic sugar&#8221; for function calls as shown in Listing 10.</p></div>
 <div class="listingblock">
 <div class="title">Listing 10</div>
 <div class="content">
@@ -960,7 +989,7 @@ int_u4 i = v.operator int_u4();</code></pre>
 <div class="content">
 <pre><code>Val v = 3.14159265;
 int_u4 i4 = v; // Which conversion?  As C++ would:
-              //  int_u4 i4 = static_cast&lt;int_u4&gt;(3.14159265);</code></pre>
+               //  int_u4 i4 = static_cast&lt;int_u4&gt;(3.14159265);</code></pre>
 </div></div>
 <div class="paragraph"><p>If the conversion doesn&#8217;t make sense, behavior is identical to that in Python - an exception is thrown, see Listing 12.</p></div>
 <div class="listingblock">
@@ -976,59 +1005,173 @@ Val a = 3.14159265;
 int_u4 i4 = a;            // converts to 3
 Tab d = i4;               // Compile-time error, can't construct Tab from float</code></pre>
 </div></div>
-<div class="paragraph"><p>The Val provides the basic container to support dynamic dictionaries. The C++ Tab is equivalent to the Python dict (think <code>Tab == Table</code>). The keys of the C++ Tab are Vals and the values of the dictionary are Vals, allowing us to construct dynamic dictionaries as shown in Listing 13.</p></div>
+<div class="paragraph"><p>The <code>Val</code> provides the basic container to support dynamic dictionaries. The C++ <code>Tab</code> is equivalent to the Python <code>dict</code> (think <code>Tab == Table</code>). The keys of the C++ Tab, as well as the values of the dictionary are `Val`s, allowing us to construct dynamic dictionaries as shown in Listing 13.</p></div>
 <div class="listingblock">
 <div class="title">Listing 13</div>
 <div class="content">
-<pre><code>   # Python
-   d = {'a':1, 'b':2.2, 'c':'three'}
+<pre><code># Python
+d = {'a':1, 'b':2.2, 'c':'three'}
 
-   // C++
-   Tab d = "{'a':1, 'b':2.2, 'c':'three'}";</code></pre>
+// C++
+Tab d = "{'a':1, 'b':2.2, 'c':'three'}";</code></pre>
 </div></div>
-<div class="paragraph"><p>Note that the C<code> literal is inside a string: we overload the constructor of the Tab to take a string which contains the literal. While C</code>11 has some great new literal constructs, it can&#8217;t quite mimic Python&#8217;s syntax.</p></div>
-<div class="paragraph"><p>Literal construction of a Python dictionary is supported using exactly the Python syntax: you can cut-and-paste the Python dictionary literal and paste it into the C++ quotes.  There is a little Python dictionary parser embedded in the Tab class so that it recognizes the same syntax.   Rather than invent a new syntax for literal construction, we leverage the well-know syntax of Python.</p></div>
-<div class="paragraph"><p>&lt;TODO&gt;</p></div>
+<div class="paragraph"><p>Note that the C++ literal is inside a string: the library overloads the constructor of the Tab to take a string which contains the literal. While C++11 has some great new literal constructs, it can&#8217;t quite mimic Python&#8217;s syntax.</p></div>
+<div class="paragraph"><p>Literal construction of a Python dictionary is supported using exactly the Python syntax: you can cut-and-paste the Python dictionary literal and paste it into the C++ quotes.  There is a little Python dictionary parser embedded in the Tab class so that it recognizes the same syntax.   Rather than invent a new syntax for literal construction, library leverage the well-known Python syntax.</p></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_facebook_folly_dynamic">4. Facebook folly::dynamic</h2>
+<h2 id="_facebook_code_folly_dynamic_code">4. Facebook <code>folly::dynamic</code></h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing-like classes. The class aims to relax the static typing constraints, especially in the <em>JSON</em> format data manipulation scenarios.</p></div>
+<div class="paragraph"><p>The Facebook folly::dynamic class is another one in the spectrum of dynamic-typing classes. The class aims to relax the static typing constraints, especially in the <em>JSON</em> format data manipulation scenarios; it provides a runtime dynamically typed value for C++, similar to the way languages with runtime type systems work (e.g. Python). It can hold types from a predetermined set (ints, bools, arrays of other dynamics, etc), similar to <code>boost::variant</code> and PicklingTools <code>Val</code>, but the syntax is intended to be more akin to using the native type directly.</p></div>
+<div class="paragraph"><p>An example of creating a <code>dynamic</code> holding most common types is shown in listing 14. Strings are stored internally as <code>fbstring</code>, the Facebook <em>drop-in</em> replacement for <code>std::string</code>.</p></div>
 <div class="listingblock">
-<div class="title">Listing</div>
+<div class="title">Listing 14</div>
 <div class="content">
-<pre><code>dynamic twelve = 12; // creates a dynamic that holds an integer
-dynamic str = "string"; // yep, this one is an fbstring
-
-// A few other types.
+<pre><code>dynamic twelve = 12;
+dynamic str = "string"; // fbstring
 dynamic nul = nullptr;
-dynamic boolean = false;
-
-// Arrays can be initialized with brackets.
-dynamic array = { "array ", "of ", 4, " elements" };
+dynamic boolean = false;</code></pre>
+</div></div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Facebook String Flavor</div>
+<div class="paragraph"><p>Facebook <code>folly::fbstring</code> is a drop-in replacement for std::string, providing the benefit of significantly increased performance on virtually all important primitives. This is achieved by using a three-tiered storage strategy and cooperating with the memory allocator; fbstring is designed to detect use of jemalloc <a href="#jemalloc">[jemalloc]</a> and cooperate with it to significantly improve speed and memory usage.</p></div>
+<div class="paragraph"><p><span class="underline">Storage strategies</span></p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Small strings (&lt;=23 chars) are stored in-situ without memory allocation.
+</p>
+</li>
+<li>
+<p>
+Medium strings (24-255 chars) are stored in malloc-allocated memory and copied eagerly.
+</p>
+</li>
+<li>
+<p>
+Large strings (&gt;255 chars) are stored in <code>malloc</code>-ated memory and copied lazily.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p><span class="underline">Implementation highlights</span></p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Compatible with <code>std::string</code>.
+</p>
+</li>
+<li>
+<p>
+Thread-safe, reference-counted copy-on-write for large (&gt;255 chars) strings.
+</p>
+</li>
+<li>
+<p>
+Uses <code>malloc</code> instead of allocators.
+</p>
+</li>
+<li>
+<p>
+Jemalloc-friendly
+</p>
+</li>
+<li>
+<p>
+The <code>find()</code> is implemented using simplified Boyer-Moore algorithm.
+</p>
+</li>
+<li>
+<p>
+Offers conversions to and from <code>std::string</code>.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Supported architectures are x32 and x64; porting <code>fbstring</code> to big-endian architectures would require changes.</p></div>
+</div></div>
+<div class="paragraph"><p>Library extensively uses C++11 features for both speed and syntactic advantages. For example, as shown in Listing 15, arrays can be initialized with <em>initializer lists</em>. This particular feature, however, also imposes a  limitation - <code>dynamic</code> has no default constructor. Rationale for this design decision is due to the standard requirement for the expression <code>dynamic d = {}</code> to call default constructor. The conflict arises in the default construction either having to result in <code>d.isArray()</code> (a) being <code>false</code> for the expression <code>dynamic d = {}</code> or (b) being true for <code>dynamic d</code>. The solution the authors of <code>folly::dynamic</code> deemed most appropriate is to entirely disallow the default construction.</p></div>
+<div class="listingblock">
+<div class="title">Listing 15</div>
+<div class="content">
+<pre><code>dynamic array = { "array ", "of ", 4, " elements" };
 assert(array.size() == 4);
 dynamic emptyArray = {};
-assert(array.empty());
-
-// Maps from dynamics to dynamics are called objects.  The
-// dynamic::object constant is how you make an empty map from dynamics
-// to dynamics.
-dynamic map = dynamic::object;
+assert(array.empty());</code></pre>
+</div></div>
+<div class="paragraph"><p>Maps from dynamics to dynamics are called objects. As shown in Listing 16, the <code>dynamic::object</code> constant is how an empty map from dynamics to dynamics is created. Same listing also shows how <code>dynamic</code> objects can be created by using <code>object::operator()</code>.</p></div>
+<div class="listingblock">
+<div class="title">Listing 16</div>
+<div class="content">
+<pre><code>dynamic map = dynamic::object;
 map["something"] = 12;
 map["another_something"] = map["something"] * 2;
 
-// Dynamic objects may be intialized this way
 dynamic map2 = dynamic::object("something", 12)("another_something", 24);</code></pre>
+</div></div>
+<div class="paragraph"><p>The internal <code>dynamic</code> storage is shown in Listing 17. Types that can be held are: <code>null</code>, <code>Array</code>, <code>bool</code>, <code>double</code>, <code>integer</code> (64-bit), <code>Object</code> and <code>String</code>.</p></div>
+<div class="listingblock">
+<div class="title">Listing 17</div>
+<div class="content">
+<pre><code>enum Type
+{
+  NULLT,
+  ARRAY,
+  BOOL,
+  DOUBLE,
+  INT64,
+  OBJECT,
+  STRING,
+};
+
+// ...
+
+Type type_;
+
+union Data
+{
+  explicit Data() : nul(nullptr) {}
+
+  void* nul; // void* used instead of std::nullptr_t due to gcc bug
+  Array array;
+  bool boolean;
+  double doubl;
+  int64_t integer;
+  fbstring string;
+
+  typename std::aligned_storage&lt;
+    sizeof(std::unordered_map&lt;int,int&gt;),
+    alignof(std::unordered_map&lt;int,int&gt;)
+  &gt;::type objectBuffer;
+} u_;</code></pre>
+</div></div>
+<div class="paragraph"><p>Examples of object and string construction are shown in Listing 18. Most notably, <code>ObjectImpl</code> is not a mere typedef but inherits from hash map; the reason for this to avoid undefined behavior of parameterizing <code>std::unordered_map</code> with an incomplete type.</p></div>
+<div class="listingblock">
+<div class="title">Listing 18</div>
+<div class="content">
+<pre><code>struct dynamic::ObjectImpl : std::unordered_map&lt;dynamic, dynamic&gt; {};
+
+// ...
+
+inline dynamic::dynamic(ObjectMaker (*)())
+  : type_(OBJECT)
+{
+  new (getAddress&lt;ObjectImpl&gt;()) ObjectImpl();
+}
+
+inline dynamic::dynamic(char const* s)
+  : type_(STRING)
+{
+  new (&amp;u_.string) fbstring(s);
+}</code></pre>
 </div></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_conclusion">5. Conclusion</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>&lt;/TODO&gt;</p></div>
+<div class="paragraph"><p>In this installment, we reviewed three C++ dynamic typing solutions: <strong>Boost</strong> <code>type_erasure</code>, <strong>PicklingTools</strong> <code>Val</code> and <strong>Facebook</strong> `folly::dynamic.</p></div>
 <hr />
-<div class="paragraph"><div class="title">Credits</div><p>Steven Watanabe provided valuable advice on <code>boost::type_erasure</code>. Günter Obiltschnig and Andrei Alexandrescu provided valuable feedback and encouragement. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
+<div class="paragraph"><div class="title">Credits</div><p>Steven Watanabe provided valuable advice on <code>boost::type_erasure</code>. Andrei Alexandrescu and other Facebook employees provided valuable feedback. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
 <br />
 <br /></p></div>
 <hr />
@@ -1041,14 +1184,19 @@ dynamic map2 = dynamic::object("something", 12)("another_something", 24);</code>
 <div class="paragraph" id="Double.Conversion"><p><a href="http://code.google.com/p/double-conversion/">Double.Conversion</a> "Double-conversion library"</p></div>
 <div class="paragraph" id="Boost.Any"><p><a href="http://www.boost.org/doc/libs/1_53_0/doc/html/any.html">Boost.Any</a> Boost.Any</p></div>
 <div class="paragraph" id="Boost.Function"><p><a href="http://www.boost.org/doc/libs/1_53_0/doc/html/function.html">Boost.function</a> Boost.Function</p></div>
-<div class="paragraph" id="Folly"><p><a href="https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md">FOLLYDY</a> Facebook folly library, dynamic class</p></div>
+<div class="paragraph" id="Folly.FBString"><p><a href="https://github.com/facebook/folly/blob/master/folly/docs/FBString.md">Folly.FBString</a>
+Facebook folly library, fbstring class</p></div>
+<div class="paragraph" id="Folly.Dynamic"><p><a href="https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md">Folly.Dynamic</a>
+Facebook folly library, dynamic class</p></div>
+<div class="paragraph" id="jemalloc"><p><a href="http://www.canonware.com/jemalloc/">jemalloc</a>
+A general-purpose scalable concurrent malloc(3) implementation.</p></div>
 </div>
 </div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-06-23 20:58:43 CDT
+Last updated 2013-07-01 00:01:01 CDT
 </div>
 </div>
 </body>
