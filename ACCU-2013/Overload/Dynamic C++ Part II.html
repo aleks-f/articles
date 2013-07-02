@@ -732,7 +732,7 @@ asciidoc.install(2);
 <body class="article">
 <div id="header">
 <h1><code>Dynamic C++, Part II</code></h1>
-<span id="author">Alex Fabijanic &lt;alex@pocoproject.org&gt;, Richard Saunders &lt;&gt;</span><br />
+<span id="author">Alex Fabijanic &lt;alex@pocoproject.org&gt;, Richard Saunders &lt;richismyname2001@yahoo.com&gt;</span><br />
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -752,7 +752,7 @@ asciidoc.install(2);
 <div class="sect1">
 <h2 id="_introduction">1. Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>In this installment of the Dynamic C++ series of articles, we continue to explore the dynamic solutions in C++ language. We start with <strong>Boost</strong> <code>type_erasure</code><a href="#Boost.TypeErasure">[Boost.TypeErasure]</a>, a combination of <strong>Boost.Any</strong> <a href="#Boost.Any">[Boost.Any]</a> and <strong>Boost.Function</strong> <a href="#Boost.Function">[Boost.Function]</a>, addressing the C++ runtime polymorphism shortcomings. Next, we look into <code>Val</code>, a class at the heart of the <strong>PicklingTools</strong> library <a href="#PicklingTools">[PicklingTools]</a> aimed at interaction with Python environment. We conclude with <strong>Facebook</strong>'s <code>folly</code> library solution for interfacing the world of web and JSON from C++ - the <code>dynamic</code> class.</p></div>
+<div class="paragraph"><p>In this installment of the Dynamic C++ series of articles, we continue to explore the dynamic solutions in C++ language. We start with <strong>Boost</strong> <code>type_erasure</code><a href="#Boost.TypeErasure">[Boost.TypeErasure]</a>, a combination of <strong>Boost.Any</strong> <a href="#Boost.Any">[Boost.Any]</a> and <strong>Boost.Function</strong> <a href="#Boost.Function">[Boost.Function]</a>, addressing the C++ runtime polymorphism shortcomings. Next, we look into <code>Val</code>, a class at the heart of the <strong>PicklingTools</strong> library <a href="#PicklingTools">[PicklingTools]</a> aimed at interaction with Python environment. We conclude with <strong>Facebook</strong>'s <strong>folly</strong> library solution for interfacing the world of web and JSON from C++ - the <code>dynamic</code> class.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -917,7 +917,7 @@ Val a = 1;         // overload constructor
 a = 2.2;           // overload op=
 a = "three";</code></pre>
 </div></div>
-<div class="paragraph"><p>The <strong>PicklingTools</strong> Val is implemented as a <em>union</em> and a <em>type-tag</em>, where the value is constructed using <em>placement new</em> inside the <em>union</em>. The destructor has to manually notice which type to destruct (for non-POD types) and explicitly call the correct constructor. The Val is really just a dynamic container, with storage as shown in Listing 7.</p></div>
+<div class="paragraph"><p>The <strong>PicklingTools</strong> Val is implemented as a <em>union</em> and a <em>type-tag</em>, where the value is constructed using <em>placement new</em> inside the <em>union</em>. The destructor has to manually notice which type to destruct (for non-POD types) and explicitly call the correct constructor. The Val is really just a dynamic container, with storage as shown in Listing 7. C++11 standard introduces <code>alignof</code>/<code>alignas</code> to address alignment concerns; in pre-C++11, although standard does not explicitly guarantee it and some experts discourage it <a href="#GotW28">[GotW28]</a>, an union with a double member is  practically close enough guarantee of the alignment to the largest member of the union.</p></div>
 <div class="listingblock">
 <div class="title">Listing 7</div>
 <div class="content">
@@ -1164,23 +1164,65 @@ inline dynamic::dynamic(char const* s)
   new (&amp;u_.string) fbstring(s);
 }</code></pre>
 </div></div>
+<div class="paragraph"><p>The gist of the <code>folly</code>'s conversion facilities is shown in the Listing 19. The listing shows the code involved in conversion of <code>dynamic</code> to <code>fbstring</code>. The actual code of converting &#8220;anything to anything&#8221;, as the documentation states is in a separate header and too large for inclusion here. For binary/decimal and vice-versa conversion of IEEE doubles, class uses V8 double-conversion <a href="#Double.Conversion">[Double.Conversion]</a>.</p></div>
+<div class="listingblock">
+<div class="title">Listing 19</div>
+<div class="content">
+<pre><code>template&lt;&gt; struct dynamic::GetAddrImpl&lt;bool&gt; {
+  static bool* get(Data&amp; d) { return &amp;d.boolean; }
+};
+
+template&lt;&gt; struct dynamic::GetAddrImpl&lt;int64_t&gt; {
+  static int64_t* get(Data&amp; d) { return &amp;d.integer; }
+};
+
+template&lt;class T&gt;
+T* dynamic::getAddress() {
+  return GetAddrImpl&lt;T&gt;::get(u_);
+}
+
+template&lt;class T&gt;
+T* dynamic::get_nothrow() {
+  if (type_ != TypeInfo&lt;T&gt;::type) {
+    return nullptr;
+  }
+  return getAddress&lt;T&gt;();
+}
+
+template&lt;class T&gt;
+T dynamic::asImpl() const
+{
+  switch (type())
+  {
+    case INT64:    return to&lt;T&gt;(*get_nothrow&lt;int64_t&gt;());
+    case DOUBLE:   return to&lt;T&gt;(*get_nothrow&lt;double&gt;());
+    case BOOL:     return to&lt;T&gt;(*get_nothrow&lt;bool&gt;());
+    case STRING:   return to&lt;T&gt;(*get_nothrow&lt;fbstring&gt;());
+    default:
+      throw TypeError("int/double/bool/string", type());
+  }
+}
+
+inline fbstring dynamic::asString() const
+{
+  return asImpl&lt;fbstring&gt;();
+}</code></pre>
+</div></div>
+<div class="paragraph"><p>As will be shown in one of the next installments, <code>dynamic</code> provides a very nice user interface, yet also provides a lot in terms of performance. It is a class designed with definite business goal in mind and it succeeds in that endeavor. The only downside for the whole <code>folly</code> library is a patchy build system which requires a significant effort to build the library. Library is also not portable, at least no in the out-of-the-box fashion.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_conclusion">5. Conclusion</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>In this installment, we reviewed three C++ dynamic typing solutions: <strong>Boost</strong> <code>type_erasure</code>, <strong>PicklingTools</strong> <code>Val</code> and <strong>Facebook</strong> `folly::dynamic.</p></div>
+<div class="paragraph"><p>In this installment, we reviewed three C++ dynamic typing solutions: <strong>Boost</strong> <code>type_erasure</code>, <strong>PicklingTools</strong> <code>Val</code> and <strong>Facebook</strong> <code>folly::dynamic. While `dynamic</code> and <code>Val</code> provide dynamically-typed storage within the confines of the standard C++,<code>type_erasure</code> also ventures in a new direction by adding operations to C++ types. In the next installment, we&#8217;ll look into more similar solutions, so stay tuned &#8230;</p></div>
 <hr />
-<div class="paragraph"><div class="title">Credits</div><p>Steven Watanabe provided valuable advice on <code>boost::type_erasure</code>. Andrei Alexandrescu and other Facebook employees provided valuable feedback. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
+<div class="paragraph"><div class="title">Credits</div><p>Steven Watanabe provided valuable advice on <code>boost::type_erasure</code>. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
 <br />
 <br /></p></div>
 <hr />
 <div class="paragraph" id="PicklingTools"><div class="title">References</div><p><a href="http://www.picklingtools.com">PICKLING</a> The PicklingTools Library</p></div>
-<div class="paragraph" id="POCO"><p><a href="http://pocoproject.org/">POCO</a> C++ Portable Components</p></div>
 <div class="paragraph" id="Stroustrup"><p><a href="http://www.artima.com/intv/abstreffi.html">Stroustrup</a> "Abstraction and Efficiency", A Conversation with Bjarne Stroustrup by Bill Venners, February 16, 2004</p></div>
 <div class="paragraph" id="ACCU13"><p><a href="http://www.slideshare.net/aleks-f/dynamic-caccu2013">ACCU13</a> "Dynamic C++", ACCU 2013 Conference</p></div>
-<div class="paragraph" id="Fabijanic08a"><p><a href="http://accu.org/index.php/journals/1502">ACCUDY1</a> "DynamicAny", Part I, Alex Fabijanic, ACCU Overload August 2008</p></div>
-<div class="paragraph" id="Fabijanic08b"><p><a href="http://accu.org/index.php/journals/1511">ACCUDY2</a> "DynamicAny", Part II, Alex Fabijanic, ACCU Overload October 2008</p></div>
 <div class="paragraph" id="Double.Conversion"><p><a href="http://code.google.com/p/double-conversion/">Double.Conversion</a> "Double-conversion library"</p></div>
 <div class="paragraph" id="Boost.Any"><p><a href="http://www.boost.org/doc/libs/1_53_0/doc/html/any.html">Boost.Any</a> Boost.Any</p></div>
 <div class="paragraph" id="Boost.Function"><p><a href="http://www.boost.org/doc/libs/1_53_0/doc/html/function.html">Boost.function</a> Boost.Function</p></div>
@@ -1190,13 +1232,15 @@ Facebook folly library, fbstring class</p></div>
 Facebook folly library, dynamic class</p></div>
 <div class="paragraph" id="jemalloc"><p><a href="http://www.canonware.com/jemalloc/">jemalloc</a>
 A general-purpose scalable concurrent malloc(3) implementation.</p></div>
+<div class="paragraph" id="GotW28"><p><a href="http://www.gotw.ca/gotw/028.htm">GotW28</a>
+The Fast Pimpl Idiom</p></div>
 </div>
 </div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-07-01 00:01:01 CDT
+Last updated 2013-07-02 00:31:36 CDT
 </div>
 </div>
 </body>

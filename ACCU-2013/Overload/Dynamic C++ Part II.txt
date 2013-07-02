@@ -1,6 +1,6 @@
 `Dynamic C++, Part II`
 ====================
-Alex Fabijanic <alex@pocoproject.org>, Richard Saunders <>
+Alex Fabijanic <alex@pocoproject.org>, Richard Saunders <richismyname2001@yahoo.com>
 :Author Initials: AF, RS
 :toc:
 :icons:
@@ -12,7 +12,7 @@ Alex Fabijanic <alex@pocoproject.org>, Richard Saunders <>
 
 == Introduction
 
-In this installment of the Dynamic C$$++$$ series of articles, we continue to explore the dynamic solutions in C$$++$$ language. We start with *Boost* `type_erasure`<<Boost.TypeErasure>>, a combination of *Boost.Any* <<Boost.Any>> and *Boost.Function* <<Boost.Function>>, addressing the C$$++$$ runtime polymorphism shortcomings. Next, we look into `Val`, a class at the heart of the *PicklingTools* library <<PicklingTools>> aimed at interaction with Python environment. We conclude with *Facebook*'s `folly` library solution for interfacing the world of web and JSON from C$$++$$ - the `dynamic` class.
+In this installment of the Dynamic C$$++$$ series of articles, we continue to explore the dynamic solutions in C$$++$$ language. We start with *Boost* `type_erasure`<<Boost.TypeErasure>>, a combination of *Boost.Any* <<Boost.Any>> and *Boost.Function* <<Boost.Function>>, addressing the C$$++$$ runtime polymorphism shortcomings. Next, we look into `Val`, a class at the heart of the *PicklingTools* library <<PicklingTools>> aimed at interaction with Python environment. We conclude with *Facebook*'s *folly* library solution for interfacing the world of web and JSON from C$$++$$ - the `dynamic` class.
 
 == Boost.TypeErasure
 
@@ -159,7 +159,7 @@ a = 2.2;           // overload op=
 a = "three";
 ----
 
-The *PicklingTools* Val is implemented as a _union_ and a _type-tag_, where the value is constructed using _placement new_ inside the _union_. The destructor has to manually notice which type to destruct (for non-POD types) and explicitly call the correct constructor. The Val is really just a dynamic container, with storage as shown in Listing 7.  
+The *PicklingTools* Val is implemented as a _union_ and a _type-tag_, where the value is constructed using _placement new_ inside the _union_. The destructor has to manually notice which type to destruct (for non-POD types) and explicitly call the correct constructor. The Val is really just a dynamic container, with storage as shown in Listing 7. C$$++$$11 standard introduces `alignof`/`alignas` to address alignment concerns; in pre-C$$++$$11, although standard does not explicitly guarantee it and some experts discourage it <<GotW28>>, an union with a double member is  practically close enough guarantee of the alignment to the largest member of the union. 
 
 .Listing 7
 ----
@@ -383,18 +383,63 @@ inline dynamic::dynamic(char const* s)
 {
   new (&u_.string) fbstring(s);
 }
-
-
 ----
+ 
+The gist of the `folly`'s conversion facilities is shown in the Listing 19. The listing shows the code involved in conversion of `dynamic` to `fbstring`. The actual code of converting ``anything to anything'', as the documentation states is in a separate header and too large for inclusion here. For binary/decimal and vice-versa conversion of IEEE doubles, class uses V8 double-conversion <<Double.Conversion>>. 
+
+.Listing 19
+----
+template<> struct dynamic::GetAddrImpl<bool> {
+  static bool* get(Data& d) { return &d.boolean; }
+};
+
+template<> struct dynamic::GetAddrImpl<int64_t> {
+  static int64_t* get(Data& d) { return &d.integer; }
+};
+
+template<class T>
+T* dynamic::getAddress() {
+  return GetAddrImpl<T>::get(u_);
+}
+
+template<class T>
+T* dynamic::get_nothrow() {
+  if (type_ != TypeInfo<T>::type) {
+    return nullptr;
+  }
+  return getAddress<T>();
+}
+
+template<class T>
+T dynamic::asImpl() const 
+{
+  switch (type()) 
+  {
+    case INT64:    return to<T>(*get_nothrow<int64_t>());
+    case DOUBLE:   return to<T>(*get_nothrow<double>());
+    case BOOL:     return to<T>(*get_nothrow<bool>());
+    case STRING:   return to<T>(*get_nothrow<fbstring>());
+    default:
+      throw TypeError("int/double/bool/string", type());
+  }
+}
+
+inline fbstring dynamic::asString() const 
+{ 
+  return asImpl<fbstring>(); 
+}
+----
+ 
+As will be shown in one of the next installments, `dynamic` provides a very nice user interface, yet also provides a lot in terms of performance. It is a class designed with definite business goal in mind and it succeeds in that endeavor. The only downside for the whole `folly` library is a patchy build system which requires a significant effort to build the library. Library is also not portable, at least no in the out-of-the-box fashion.
  
 == Conclusion
 
-In this installment, we reviewed three C$$++$$ dynamic typing solutions: *Boost* `type_erasure`, *PicklingTools* `Val` and *Facebook* `folly::dynamic.
+In this installment, we reviewed three C$$++$$ dynamic typing solutions: *Boost* `type_erasure`, *PicklingTools* `Val` and *Facebook* `folly::dynamic. While `dynamic` and `Val` provide dynamically-typed storage within the confines of the standard C$$++$$,`type_erasure` also ventures in a new direction by adding operations to C$$++$$ types. In the next installment, we'll look into more similar solutions, so stay tuned ...
 
 ''''
 .Credits
 
-Steven Watanabe provided valuable advice on `boost::type_erasure`. Andrei Alexandrescu and other Facebook employees provided valuable feedback. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
+Steven Watanabe provided valuable advice on `boost::type_erasure`. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
  +
  +
 
@@ -405,20 +450,11 @@ Steven Watanabe provided valuable advice on `boost::type_erasure`. Andrei Alexan
 [[PicklingTools]]
 http://www.picklingtools.com[PICKLING] The PicklingTools Library
 
-[[POCO]]
-http://pocoproject.org/[POCO] C$$++$$ Portable Components
-
 [[Stroustrup]]
 http://www.artima.com/intv/abstreffi.html[Stroustrup] "Abstraction and Efficiency", A Conversation with Bjarne Stroustrup by Bill Venners, February 16, 2004
 
 [[ACCU13]]
 http://www.slideshare.net/aleks-f/dynamic-caccu2013[ACCU13] "Dynamic C++", ACCU 2013 Conference
-
-[[Fabijanic08a]]
-http://accu.org/index.php/journals/1502[ACCUDY1] "DynamicAny", Part I, Alex Fabijanic, ACCU Overload August 2008
-
-[[Fabijanic08b]]
-http://accu.org/index.php/journals/1511[ACCUDY2] "DynamicAny", Part II, Alex Fabijanic, ACCU Overload October 2008
 
 [[Double.Conversion]]
 http://code.google.com/p/double-conversion/[Double.Conversion] "Double-conversion library"
@@ -440,3 +476,7 @@ Facebook folly library, dynamic class
 [[jemalloc]]
 http://www.canonware.com/jemalloc/[jemalloc]
 A general-purpose scalable concurrent malloc(3) implementation.
+
+[[GotW28]]
+http://www.gotw.ca/gotw/028.htm[GotW28]
+The Fast Pimpl Idiom
