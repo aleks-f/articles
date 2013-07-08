@@ -776,7 +776,7 @@ inability to apply multiple independent concepts to a single object.
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>Library uses some advanced constructs such as concepts and template metaprogramming constructs from <code>boost::mpl</code>. In a similar fashion like <code>boost::variant</code> specifying a set of types at construction time that can be contained at runtime, the <code>type_erasure</code> library specifies at construction time a set of operations that can be performed on it at runtime. This is achieved through a vector of <em>concepts</em> provided at object declaration site as shown in Listing 1 for an <code>incrementable</code> and <code>ostreamable</code> object.</p></div>
+<div class="paragraph"><p>Library uses some advanced constructs such as concepts and template metaprogramming constructs from <code>boost::mpl</code>. In a similar fashion to <code>boost::variant</code> specifying a set of types at construction time that can be contained at runtime, the <code>type_erasure</code> library specifies at construction time a set of operations that can be performed on it at runtime. This is achieved through a vector of <em>concepts</em> provided at object declaration site as shown in Listing 1 for an <code>incrementable</code> and <code>ostreamable</code> object.</p></div>
 <div class="listingblock">
 <div class="title">Listing 1</div>
 <div class="content">
@@ -858,13 +858,13 @@ typedef ::boost::type_erasure::binding&lt;Concept&gt; table_type;
 ::boost::type_erasure::detail::storage data;
                            table_type table;</code></pre>
 </div></div>
-<div class="paragraph"><p>Boost.Type erasure is an interesting and valuable "merger" of <code>any</code> and <code>function</code> features, providing dynamic-language like features within the confines of standard C++. Implementation is rather complex and use has some non-intuitive weak spots that can quickly get an inexperienced user in a serious trouble. A more robust interface (even if only with _typedef_s provided for most frequently used types) would greatly improve the usability and safety for less experienced users.</p></div>
+<div class="paragraph"><p>Boost.Type erasure is an interesting and valuable "merger" of <code>any</code> and <code>function</code> features, providing dynamic-language like features within the confines of standard C++. Implementation is rather complex and use has some non-intuitive weak spots that can quickly get an inexperienced user in serious trouble. A more robust interface (even if only with _typedef_s provided for most frequently used types) would greatly improve the usability and safety for less experienced users.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_picklingtools_val">3. PicklingTools Val</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The next reviewed solution to the dynamic typing problem is the <strong>PicklingTools</strong> <a href="#PicklingTools">[PicklingTools]</a> Val. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication.  The PicklingTools evolved from a need allowing Python and C++ to share Python dictionaries across language boundaries.  Many modern applications are built using multiple languages: Python, C++, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C++, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid system, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the <em>currency</em> of many systems. The <strong>PicklingTools</strong> library solution focuses on the Python dictionary and C++.</p></div>
+<div class="paragraph"><p>The next reviewed solution to the dynamic typing problem is the <strong>PicklingTools</strong> <a href="#PicklingTools">[PicklingTools]</a> Val <a href="#Saunders1">[Saunders1]</a>, <a href="#Saunders2">[Saunders2]</a>, <a href="#Saunders3">[Saunders3]</a>. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication.  The PicklingTools evolved from a need allowing Python and C++ to share Python dictionaries across language boundaries.  Many modern applications are built using multiple languages: Python, C++, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C++, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid system, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the <em>currency</em> of many systems. The <strong>PicklingTools</strong> library solution focuses on the Python dictionary and C++.</p></div>
 <div class="paragraph"><p>While making Python dictionaries easy to express in C++ was not a primary goal, given how much users enjoyed the ease of use, the C++ PicklingTools embraced them wholeheartedly. The goal, then, became to make Python dictionaries as easy to express in C++ as it was in Python.</p></div>
 <div class="paragraph"><p>Consider the ease of a dynamic dictionary manipulation in Python shown in Listing 5.</p></div>
 <div class="listingblock">
@@ -976,7 +976,7 @@ Val c = "three";
 // Get a value out via user-defined conversions
 int_u4 i = a;</code></pre>
 </div></div>
-<div class="paragraph"><p>The user-defined conversions and overloading" are syntactic sugar. Of course, overloaded cast operators direct calls are really just taking advantage of &#8220;syntactic sugar&#8221; for function calls as shown in Listing 10.</p></div>
+<div class="paragraph"><p>The user-defined conversions and overloading are syntactic sugar. Of course, overloaded cast operators direct calls are really just taking advantage of &#8220;syntactic sugar&#8221; for function calls as shown in Listing 10.</p></div>
 <div class="listingblock">
 <div class="title">Listing 10</div>
 <div class="content">
@@ -1016,7 +1016,7 @@ d = {'a':1, 'b':2.2, 'c':'three'}
 Tab d = "{'a':1, 'b':2.2, 'c':'three'}";</code></pre>
 </div></div>
 <div class="paragraph"><p>Note that the C++ literal is inside a string: the library overloads the constructor of the Tab to take a string which contains the literal. While C++11 has some great new literal constructs, it can&#8217;t quite mimic Python&#8217;s syntax.</p></div>
-<div class="paragraph"><p>Literal construction of a Python dictionary is supported using exactly the Python syntax: you can cut-and-paste the Python dictionary literal and paste it into the C++ quotes.  There is a little Python dictionary parser embedded in the Tab class so that it recognizes the same syntax.   Rather than invent a new syntax for literal construction, library leverage the well-known Python syntax.</p></div>
+<div class="paragraph"><p>Literal construction of a Python dictionary is supported using exactly the Python syntax: you can cut-and-paste the Python dictionary literal and paste it into the C++ quotes.  There is a little Python dictionary parser embedded in the Tab class so that it recognizes the same syntax.   Rather than invent a new syntax for literal construction, library leverages the well-known Python syntax.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -1087,9 +1087,9 @@ Offers conversions to and from <code>std::string</code>.
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>Supported architectures are x32 and x64; porting <code>fbstring</code> to big-endian architectures would require changes.</p></div>
+<div class="paragraph"><p>Supported architectures are x86 and x64; porting <code>fbstring</code> to big-endian architectures would require changes.</p></div>
 </div></div>
-<div class="paragraph"><p>Library extensively uses C++11 features for both speed and syntactic advantages. For example, as shown in Listing 15, arrays can be initialized with <em>initializer lists</em>. This particular feature, however, also imposes a  limitation - <code>dynamic</code> has no default constructor. Rationale for this design decision is due to the standard requirement for the expression <code>dynamic d = {}</code> to call default constructor. The conflict arises in the default construction either having to result in <code>d.isArray()</code> (a) being <code>false</code> for the expression <code>dynamic d = {}</code> or (b) being true for <code>dynamic d</code>. The solution the authors of <code>folly::dynamic</code> deemed most appropriate is to entirely disallow the default construction.</p></div>
+<div class="paragraph"><p>The library extensively uses C++11 features for both speed and syntactic advantages. For example, as shown in Listing 15, arrays can be initialized with <em>initializer lists</em>. This particular feature, however, also imposes a  limitation - <code>dynamic</code> has no default constructor. The rationale for this design decision is due to the standard requirement for the expression <code>dynamic d = {}</code> to call default constructor. The conflict arises in the default construction either having to result in <code>d.isArray()</code> (a) being <code>false</code> for the expression <code>dynamic d = {}</code> or (b) being true for <code>dynamic d</code>. The solution the authors of <code>folly::dynamic</code> deemed most appropriate is to entirely disallow the default construction.</p></div>
 <div class="listingblock">
 <div class="title">Listing 15</div>
 <div class="content">
@@ -1208,13 +1208,13 @@ inline fbstring dynamic::asString() const
   return asImpl&lt;fbstring&gt;();
 }</code></pre>
 </div></div>
-<div class="paragraph"><p>As will be shown in one of the next installments, <code>dynamic</code> provides a very nice user interface, yet also provides a lot in terms of performance. It is a class designed with definite business goal in mind and it succeeds in that endeavor. The only downside for the whole <code>folly</code> library is a patchy build system which requires a significant effort to build the library. Library is also not portable, at least no in the out-of-the-box fashion.</p></div>
+<div class="paragraph"><p>As will be shown in one of the next installments, <code>dynamic</code> provides a very nice user interface, yet also provides a lot in terms of performance. It is a class designed with definite business goal in mind and it succeeds in that endeavor. The only downside for the whole <code>folly</code> library is a patchy build system which requires a significant effort to build the library. The library is also not portable, at least not in the out-of-the-box fashion.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_conclusion">5. Conclusion</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>In this installment, we reviewed three C++ dynamic typing solutions: <strong>Boost</strong> <code>type_erasure</code>, <strong>PicklingTools</strong> <code>Val</code> and <strong>Facebook</strong> <code>folly::dynamic. While `dynamic</code> and <code>Val</code> provide dynamically-typed storage within the confines of the standard C++,<code>type_erasure</code> also ventures in a new direction by adding operations to C++ types. In the next installment, we&#8217;ll look into more similar solutions, so stay tuned &#8230;</p></div>
+<div class="paragraph"><p>In this installment, we reviewed three C++ dynamic typing solutions: <strong>Boost</strong> <code>type_erasure</code>, <strong>PicklingTools</strong> <code>Val</code> and <strong>Facebook</strong> <code>folly::dynamic</code>. While <code>dynamic</code> and <code>Val</code> provide dynamically-typed storage within the confines of the standard C++,<code>type_erasure</code> also ventures in a new direction by adding operations to C++ types. In the next installment, we&#8217;ll look into more similar solutions, so stay tuned &#8230;</p></div>
 <hr />
 <div class="paragraph"><div class="title">Credits</div><p>Steven Watanabe provided valuable advice on <code>boost::type_erasure</code>. The list is, of course, not inclusive - many other people, discussions, libraries and code samples were an indispensable source of help in gathering and systematizing this writing.
 <br />
@@ -1223,9 +1223,15 @@ inline fbstring dynamic::asString() const
 <div class="paragraph" id="PicklingTools"><div class="title">References</div><p><a href="http://www.picklingtools.com">PICKLING</a> The PicklingTools Library</p></div>
 <div class="paragraph" id="Stroustrup"><p><a href="http://www.artima.com/intv/abstreffi.html">Stroustrup</a> "Abstraction and Efficiency", A Conversation with Bjarne Stroustrup by Bill Venners, February 16, 2004</p></div>
 <div class="paragraph" id="ACCU13"><p><a href="http://www.slideshare.net/aleks-f/dynamic-caccu2013">ACCU13</a> "Dynamic C++", ACCU 2013 Conference</p></div>
-<div class="paragraph" id="Double.Conversion"><p><a href="http://code.google.com/p/double-conversion/">Double.Conversion</a> "Double-conversion library"</p></div>
+<div class="paragraph" id="Double.Conversion"><p><a href="http://code.google.com/p/double-conversion/">Double.Conversion</a> &#8220;Double-conversion library&#8221;</p></div>
 <div class="paragraph" id="Boost.Any"><p><a href="http://www.boost.org/doc/libs/1_53_0/doc/html/any.html">Boost.Any</a> Boost.Any</p></div>
 <div class="paragraph" id="Boost.Function"><p><a href="http://www.boost.org/doc/libs/1_53_0/doc/html/function.html">Boost.function</a> Boost.Function</p></div>
+<div class="paragraph" id="Saunders1"><p><a href="http://cppnow.org/session/dynamic-recursive-heterogeneous-types-in-statically-typed-languages/">Saunders1</a>
+&#8220;Dynamic, Recursive, Heterogeneous Types in Statically-Typed Languages&#8221;, Clinton Jeffery, Richard Saunders, &#8220;C++ Now&#8221; 2013 Presentation</p></div>
+<div class="paragraph" id="Saunders2"><p><a href="http://cppnow.org/files/2013/03/saunders-jeffery.pdf">Saunders2</a>
+"Dynamic, Recursive, Heterogeneous Types in Statically-Typed Languages" Clinton Jeffery, Richard Saunders</p></div>
+<div class="paragraph" id="Saunders3"><p><a href="http://www.youtube.com/watch?v=W3TsQtnMtqg">Saunders3</a>
+&#8220;C++ Now&#8221; 2013 Presentation, Richard Saunders</p></div>
 <div class="paragraph" id="Folly.FBString"><p><a href="https://github.com/facebook/folly/blob/master/folly/docs/FBString.md">Folly.FBString</a>
 Facebook folly library, fbstring class</p></div>
 <div class="paragraph" id="Folly.Dynamic"><p><a href="https://github.com/facebook/folly/blob/master/folly/docs/Dynamic.md">Folly.Dynamic</a>
@@ -1240,7 +1246,7 @@ The Fast Pimpl Idiom</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-07-02 00:31:36 CDT
+Last updated 2013-07-08 14:54:25 CDT
 </div>
 </div>
 </body>
