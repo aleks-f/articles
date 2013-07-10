@@ -752,7 +752,7 @@ asciidoc.install(2);
 <div class="sect1">
 <h2 id="_introduction">1. Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>In this installment of the Dynamic C++ series of articles, we continue to explore the dynamic solutions in C++ language. We start with <strong>Boost</strong> <code>type_erasure</code><a href="#Boost.TypeErasure">[Boost.TypeErasure]</a>, a combination of <strong>Boost.Any</strong> <a href="#Boost.Any">[Boost.Any]</a> and <strong>Boost.Function</strong> <a href="#Boost.Function">[Boost.Function]</a>, addressing the C++ runtime polymorphism shortcomings. Next, we look into <code>Val</code>, a class at the heart of the <strong>PicklingTools</strong> library <a href="#PicklingTools">[PicklingTools]</a> aimed at interaction with Python environment. We conclude with <strong>Facebook</strong>'s <strong>folly</strong> library solution for interfacing the world of web and JSON from C++ - the <code>dynamic</code> class.</p></div>
+<div class="paragraph"><p>In this installment of the Dynamic C++ series of articles, we continue to explore the dynamic solutions in C++ language. We start with <strong>Boost</strong> <code>type_erasure</code><a href="#Boost.TypeErasure">[Boost.TypeErasure]</a>, a combination of <strong>Boost.Any</strong> <a href="#Boost.Any">[Boost.Any]</a> and <strong>Boost.Function</strong> <a href="#Boost.Function">[Boost.Function]</a>, addressing the C++ runtime polymorphism shortcomings. Next, we look into <code>Val</code>, a class at the heart of the <strong>PicklingTools</strong> library <a href="#PicklingTools">[PicklingTools]</a> aimed at interaction with Python environments. We conclude with <strong>Facebook</strong>'s <strong>folly</strong> library solution for interfacing the world of web and JSON from C++ - the <code>dynamic</code> class.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -791,7 +791,7 @@ inability to apply multiple independent concepts to a single object.
 ++x; // incrementable
 std::cout &lt;&lt; x &lt;&lt; std::endl; // ostreamable</code></pre>
 </div></div>
-<div class="paragraph"><p>In the example, <code>copy_constructible</code> allows <em>copying</em> and <em>destruction</em> of the object, while <code>typeid_</code> provides <em>run-time type information</em> so that <code>any_cast</code> can be used; these effectively make <code>type_erasure any</code> equivalent to <code>any</code> <a href="#Boost.Any">[Boost.Any]</a>. Additionally, <code>incrementable</code> and <code>ostreamable</code> concepts are specified, allowing incrementing and streaming of the value <code>x</code>. Operations can have arguments, so replacing <code>incrementable</code> <em>concept</em> with <code>addable</code>, allows adding of two <code>any</code>'s. The functionality is brittle in a subtle way, though - while adding two values of different types will compile, unfortunately it results in undefined behavior at runtime. This problem can be alleviated by specifying <code>relaxed_match</code> concept (according to author, recently renamed to a more appropriate <code>relaxed</code> name), which causes exception to be thrown. The proper way of dealing with this problem is using <em>placeholders</em>, as shown in Listing 2</p></div>
+<div class="paragraph"><p>In the example, <code>copy_constructible</code> allows <em>copying</em> and <em>destruction</em> of the object, while <code>typeid_</code> provides <em>run-time type information</em> so that <code>any_cast</code> can be used; these effectively make <code>type_erasure any</code> equivalent to <code>any</code> <a href="#Boost.Any">[Boost.Any]</a>. Additionally, <code>incrementable</code> and <code>ostreamable</code> concepts are specified, allowing incrementing and streaming of the value <code>x</code>. Operations can have arguments, so replacing <code>incrementable</code> <em>concept</em> with <code>addable</code>, allows adding of two <code>any</code>'s. The functionality is brittle in a subtle way, though - while adding two values of different types will compile, unfortunately it results in undefined behavior at runtime. This problem can be alleviated by specifying <code>relaxed_match</code> concept (according to author, recently renamed to a more appropriate <code>relaxed</code> name), which causes exception to be thrown. The proper way of dealing with this problem is using <em>placeholders</em>, as shown in Listing 2.</p></div>
 <div class="listingblock">
 <div class="title">Listing 2</div>
 <div class="content">
@@ -809,7 +809,7 @@ any&lt;requirements, _a&gt; x(get&lt; 0 &gt; (t) + get&lt; 1 &gt;(t));
 // x now holds array + 2</code></pre>
 </div></div>
 <div class="paragraph"><p>Placeholders are used extensively throughout the library. A placeholder is a substitute for a template parameter in a concept. The library automatically replaces all placeholders with the actual wrapped types.</p></div>
-<div class="paragraph"><p>Furthermore, <code>type_erasure</code> supports references (both <code>const</code> and <code>non-const</code>), as well as user-defined <em>concepts</em>. Listing 3 demonstrates adding <code>stringable</code> <em>concept</em> to <code>type_erasure</code>, allowing a <code>to_string()</code> member function call syntax directly on an <em>integer</em> value wrapped in <code>any</code>. Things can be simplified when implementation and interface are the same (i.e. a member of <code>type_erasure::any</code> called <code>to_string</code> calls a <code>to_string</code> member of the contained type), BOOST_TYPE_ERASURE_MEMBER &#8220;shortcut&#8221; macro can be used.</p></div>
+<div class="paragraph"><p>Furthermore, <code>type_erasure</code> supports references (both <code>const</code> and <code>non-const</code>), as well as user-defined <em>concepts</em>. Listing 3 demonstrates adding <code>stringable</code> <em>concept</em> to <code>type_erasure</code>, allowing a <code>to_string()</code> member function call syntax directly on an <em>integer</em> value wrapped in <code>any</code>. Things can be simplified when implementation and interface are the same (i.e. a member of <code>type_erasure::any</code> called <code>to_string</code> calls a <code>to_string</code> member of the contained type), <code>BOOST_TYPE_ERASURE_MEMBER</code> &#8220;shortcut&#8221; macro can be used.</p></div>
 <div class="listingblock">
 <div class="title">Listing 3</div>
 <div class="content">
@@ -864,7 +864,7 @@ typedef ::boost::type_erasure::binding&lt;Concept&gt; table_type;
 <div class="sect1">
 <h2 id="_picklingtools_val">3. PicklingTools Val</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The next reviewed solution to the dynamic typing problem is the <strong>PicklingTools</strong> <a href="#PicklingTools">[PicklingTools]</a> Val <a href="#Saunders1">[Saunders1]</a>, <a href="#Saunders2">[Saunders2]</a>, <a href="#Saunders3">[Saunders3]</a>. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication.  The PicklingTools evolved from a need allowing Python and C++ to share Python dictionaries across language boundaries.  Many modern applications are built using multiple languages: Python, C++, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C++, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid system, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the <em>currency</em> of many systems. The <strong>PicklingTools</strong> library solution focuses on the Python dictionary and C++.</p></div>
+<div class="paragraph"><p>The next reviewed solution to the dynamic typing problem is the <strong>PicklingTools</strong> <a href="#PicklingTools">[PicklingTools]</a> Val <a href="#Saunders1">[Saunders1]</a>, <a href="#Saunders2">[Saunders2]</a>, <a href="#Saunders3">[Saunders3]</a>. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication. The PicklingTools evolved from a need to allow Python and C++ to share Python dictionaries across language boundaries. Many modern applications are built using multiple languages: Python, C++, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C++, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid systems, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the <em>currency</em> of many systems. The <strong>PicklingTools</strong> library solution focuses on the Python dictionary and C++.</p></div>
 <div class="paragraph"><p>While making Python dictionaries easy to express in C++ was not a primary goal, given how much users enjoyed the ease of use, the C++ PicklingTools embraced them wholeheartedly. The goal, then, became to make Python dictionaries as easy to express in C++ as it was in Python.</p></div>
 <div class="paragraph"><p>Consider the ease of a dynamic dictionary manipulation in Python shown in Listing 5.</p></div>
 <div class="listingblock">
@@ -1005,7 +1005,7 @@ Val a = 3.14159265;
 int_u4 i4 = a;            // converts to 3
 Tab d = i4;               // Compile-time error, can't construct Tab from float</code></pre>
 </div></div>
-<div class="paragraph"><p>The <code>Val</code> provides the basic container to support dynamic dictionaries. The C++ <code>Tab</code> is equivalent to the Python <code>dict</code> (think <code>Tab == Table</code>). The keys of the C++ Tab, as well as the values of the dictionary are `Val`s, allowing us to construct dynamic dictionaries as shown in Listing 13.</p></div>
+<div class="paragraph"><p>The <code>Val</code> provides the basic container to support dynamic dictionaries. The C++ <code>Tab</code> is equivalent to the Python <code>dict</code> (think <code>Tab == Table</code>). The keys of the C++ <code>Tab</code>, as well as the values of the dictionary are <code>Val</code>'s, allowing us to construct dynamic dictionaries as shown in Listing 13.</p></div>
 <div class="listingblock">
 <div class="title">Listing 13</div>
 <div class="content">
@@ -1078,7 +1078,7 @@ Jemalloc-friendly
 </li>
 <li>
 <p>
-The <code>find()</code> is implemented using simplified Boyer-Moore algorithm.
+The <code>find()</code> is implemented using <a href="#BoyerMoore">[BoyerMoore]</a>.
 </p>
 </li>
 <li>
@@ -1240,13 +1240,15 @@ Facebook folly library, dynamic class</p></div>
 A general-purpose scalable concurrent malloc(3) implementation.</p></div>
 <div class="paragraph" id="GotW28"><p><a href="http://www.gotw.ca/gotw/028.htm">GotW28</a>
 The Fast Pimpl Idiom</p></div>
+<div class="paragraph" id="BoyerMoore"><p><a href="http://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string_search_algorithm">BoyerMoore</a>
+Boyer–Moore string search algorithm</p></div>
 </div>
 </div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-07-08 14:54:25 CDT
+Last updated 2013-07-10 01:32:31 CDT
 </div>
 </div>
 </body>

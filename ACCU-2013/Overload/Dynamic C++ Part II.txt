@@ -12,7 +12,7 @@ Alex Fabijanic <alex@pocoproject.org>, Richard Saunders <richismyname2001@yahoo.
 
 == Introduction
 
-In this installment of the Dynamic C$$++$$ series of articles, we continue to explore the dynamic solutions in C$$++$$ language. We start with *Boost* `type_erasure`<<Boost.TypeErasure>>, a combination of *Boost.Any* <<Boost.Any>> and *Boost.Function* <<Boost.Function>>, addressing the C$$++$$ runtime polymorphism shortcomings. Next, we look into `Val`, a class at the heart of the *PicklingTools* library <<PicklingTools>> aimed at interaction with Python environment. We conclude with *Facebook*'s *folly* library solution for interfacing the world of web and JSON from C$$++$$ - the `dynamic` class.
+In this installment of the Dynamic C$$++$$ series of articles, we continue to explore the dynamic solutions in C$$++$$ language. We start with *Boost* `type_erasure`<<Boost.TypeErasure>>, a combination of *Boost.Any* <<Boost.Any>> and *Boost.Function* <<Boost.Function>>, addressing the C$$++$$ runtime polymorphism shortcomings. Next, we look into `Val`, a class at the heart of the *PicklingTools* library <<PicklingTools>> aimed at interaction with Python environments. We conclude with *Facebook*'s *folly* library solution for interfacing the world of web and JSON from C$$++$$ - the `dynamic` class.
 
 == Boost.TypeErasure
 
@@ -38,7 +38,7 @@ any<
 std::cout << x << std::endl; // ostreamable
 ----
 
-In the example, `copy_constructible` allows _copying_ and _destruction_ of the object, while `typeid_` provides _run-time type information_ so that `any_cast` can be used; these effectively make `type_erasure any` equivalent to `any` <<Boost.Any>>. Additionally, `incrementable` and `ostreamable` concepts are specified, allowing incrementing and streaming of the value `x`. Operations can have arguments, so replacing `incrementable` _concept_ with `addable`, allows adding of two `any`'s. The functionality is brittle in a subtle way, though - while adding two values of different types will compile, unfortunately it results in undefined behavior at runtime. This problem can be alleviated by specifying `relaxed_match` concept (according to author, recently renamed to a more appropriate `relaxed` name), which causes exception to be thrown. The proper way of dealing with this problem is using _placeholders_, as shown in Listing 2
+In the example, `copy_constructible` allows _copying_ and _destruction_ of the object, while `typeid_` provides _run-time type information_ so that `any_cast` can be used; these effectively make `type_erasure any` equivalent to `any` <<Boost.Any>>. Additionally, `incrementable` and `ostreamable` concepts are specified, allowing incrementing and streaming of the value `x`. Operations can have arguments, so replacing `incrementable` _concept_ with `addable`, allows adding of two `any`'s. The functionality is brittle in a subtle way, though - while adding two values of different types will compile, unfortunately it results in undefined behavior at runtime. This problem can be alleviated by specifying `relaxed_match` concept (according to author, recently renamed to a more appropriate `relaxed` name), which causes exception to be thrown. The proper way of dealing with this problem is using _placeholders_, as shown in Listing 2.
 
 .Listing 2
 ----
@@ -58,7 +58,7 @@ any<requirements, _a> x(get< 0 > (t) + get< 1 >(t));
 
 Placeholders are used extensively throughout the library. A placeholder is a substitute for a template parameter in a concept. The library automatically replaces all placeholders with the actual wrapped types.
 
-Furthermore, `type_erasure` supports references (both `const` and `non-const`), as well as user-defined _concepts_. Listing 3 demonstrates adding `stringable` _concept_ to `type_erasure`, allowing a `to_string()` member function call syntax directly on an _integer_ value wrapped in `any`. Things can be simplified when implementation and interface are the same (i.e. a member of `type_erasure::any` called `to_string` calls a `to_string` member of the contained type), BOOST_TYPE_ERASURE_MEMBER ``shortcut'' macro can be used.
+Furthermore, `type_erasure` supports references (both `const` and `non-const`), as well as user-defined _concepts_. Listing 3 demonstrates adding `stringable` _concept_ to `type_erasure`, allowing a `to_string()` member function call syntax directly on an _integer_ value wrapped in `any`. Things can be simplified when implementation and interface are the same (i.e. a member of `type_erasure::any` called `to_string` calls a `to_string` member of the contained type), `BOOST_TYPE_ERASURE_MEMBER` ``shortcut'' macro can be used.
 
 .Listing 3
 ----
@@ -114,7 +114,7 @@ Boost.Type erasure is an interesting and valuable "merger" of `any` and `functio
 
 == PicklingTools Val
 
-The next reviewed solution to the dynamic typing problem is the *PicklingTools* <<PicklingTools>> Val <<Saunders1>>, <<Saunders2>>, <<Saunders3>>. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication.  The PicklingTools evolved from a need allowing Python and C$$++$$ to share Python dictionaries across language boundaries.  Many modern applications are built using multiple languages: Python, C$$++$$, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C$$++$$, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid system, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the _currency_ of many systems. The *PicklingTools* library solution focuses on the Python dictionary and C$$++$$.
+The next reviewed solution to the dynamic typing problem is the *PicklingTools* <<PicklingTools>> Val <<Saunders1>>, <<Saunders2>>, <<Saunders3>>. The PicklingTools library is an open-source library made up of Python, C++ and Java code allowing cross language communication. The PicklingTools evolved from a need to allow Python and C$$++$$ to share Python dictionaries across language boundaries. Many modern applications are built using multiple languages: Python, C$$++$$, Java, JavaScript, Lua, Icon/Unicon. The front-end languages (JavaScript, Python, Lua) tend to be dynamic languages for handling scripting and basic data flow. The back-end languages (C$$++$$, C, Java, FORTRAN) handle the heavy-lifting of fast communications, data I/O and CPU intensive work. In these hybrid systems, front-end languages need to communicate with the back-end languages intensively. Dictionaries, supported in some form by most dynamic languages, became the _currency_ of many systems. The *PicklingTools* library solution focuses on the Python dictionary and C$$++$$.
 
 While making Python dictionaries easy to express in C$$++$$ was not a primary goal, given how much users enjoyed the ease of use, the C$$++$$ PicklingTools embraced them wholeheartedly. The goal, then, became to make Python dictionaries as easy to express in C$$++$$ as it was in Python.  
 
@@ -254,7 +254,7 @@ int_u4 i4 = a;            // converts to 3
 Tab d = i4;               // Compile-time error, can't construct Tab from float
 ----
 
-The `Val` provides the basic container to support dynamic dictionaries. The C++ `Tab` is equivalent to the Python `dict` (think `Tab == Table`). The keys of the C$$++$$ Tab, as well as the values of the dictionary are `Val`s, allowing us to construct dynamic dictionaries as shown in Listing 13.
+The `Val` provides the basic container to support dynamic dictionaries. The C$$++$$ `Tab` is equivalent to the Python `dict` (think `Tab == Table`). The keys of the C$$++$$ `Tab`, as well as the values of the dictionary are `Val`'s, allowing us to construct dynamic dictionaries as shown in Listing 13.
 
 .Listing 13
 ----
@@ -300,7 +300,7 @@ Facebook `folly::fbstring` is a drop-in replacement for std::string, providing t
 - Thread-safe, reference-counted copy-on-write for large (>255 chars) strings.
 - Uses `malloc` instead of allocators.
 - Jemalloc-friendly
-- The `find()` is implemented using simplified Boyer-Moore algorithm. 
+- The `find()` is implemented using <<BoyerMoore>>. 
 - Offers conversions to and from `std::string`.
 
 Supported architectures are x86 and x64; porting `fbstring` to big-endian architectures would require changes.
@@ -492,3 +492,7 @@ A general-purpose scalable concurrent malloc(3) implementation.
 [[GotW28]]
 http://www.gotw.ca/gotw/028.htm[GotW28]
 The Fast Pimpl Idiom
+
+[[BoyerMoore]]
+http://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string_search_algorithm[BoyerMoore]
+Boyer–Moore string search algorithm
