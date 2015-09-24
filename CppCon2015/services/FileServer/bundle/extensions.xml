@@ -1,0 +1,4 @@
+<extensions>
+  <!-- path must be specified here in order to be accessible through web server -->
+  <extension point="osp.web.server.requesthandler" path="/" class="FileServerRequestHandlerFactory" library="io.macchina.services.fileserver" allowSpecialization="all" permission="" description="Web file server."/>
+</extensions>

@@ -1,0 +1,30 @@
+<bundlespec>
+  <manifest>
+    <name>Nucor L2 File Server Library</name>
+    <symbolicName>io.macchina.services.fileserver</symbolicName>
+    <version>1.0.3</version>
+    <vendor>Applied Informatics</vendor>
+	<copyright>(c) 2015, Applied Informatics Software Engineering GmbH</copyright>
+    <activator>
+      <class>FileServerBundleActivator</class>
+      <library>io.macchina.services.fileserver</library>
+    </activator>
+    <lazyStart>false</lazyStart>
+    <runLevel>700</runLevel>
+    <dependency>
+      <symbolicName>osp.web</symbolicName>
+      <version>[1.0.0,2.0.0)</version>
+      <symbolicName>com.appinf.osp.webevent</symbolicName>
+	  <version>[1.0.0, 2.0.0)</version>
+    </dependency>
+  </manifest>
+  <code>
+		bin/*.dll,
+		bin/*.pdb,
+		bin/${osName}/${osArch}/*.so,
+		bin/${osName}/${osArch}/*.dylib
+	</code>
+	<files>
+		bundle/*
+	</files>
+</bundlespec>

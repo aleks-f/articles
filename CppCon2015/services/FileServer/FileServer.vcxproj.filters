@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{c83184c2-fe23-4b09-abd6-2fdd927a89a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Source Files">
+      <UniqueIdentifier>{9beb0859-b723-461a-98c4-26692170bc39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Header Files">
+      <UniqueIdentifier>{15362049-b319-4ae9-a552-2ecc97321dff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bundle">
+      <UniqueIdentifier>{b2bdec03-260b-4114-8b5c-9a0572f5976c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bundle\bundle.properties">
+      <Filter>Bundle</Filter>
+    </None>
+    <None Include="bundle\extensions.xml">
+      <Filter>Bundle</Filter>
+    </None>
+    <None Include="FileServer.bndlspec">
+      <Filter>Bundle</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\FileServerBundleActivator.cpp">
+      <Filter>Core\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FileServerRequestHandler.cpp">
+      <Filter>Core\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

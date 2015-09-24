@@ -1,0 +1,64 @@
+<html>
+	<head>
+	<! -- Example demonstrates use of WebSocket PING/PONG heartbeat -->
+	
+		<title>WebSocket Demo</title>
+		<script src="websocket/WebEventServer.js" type="text/javascript"></script>
+		<script type="text/javascript">
+
+		var ws;
+		var uid = '.' + newGuid();
+
+		var subject = "org.poco.demo";
+		
+		function onMessage(response) {
+			var subject = response.data.split(" ")[1];
+			if (subject.lastIndexOf(uid) != -1) return;// ignore echo
+			var data = response.data.split("\r\n")[1];
+			var oldVal = document.getElementById("input").value;
+			document.getElementById("input").value = oldVal + data;
+		}
+		
+		function onOpen(response) {
+			ws.subscribe(subject);
+		}
+		
+		function initialize()
+		{
+		  var hasWebSocket = window.WebSocket;
+		  if (hasWebSocket)
+		  {
+			ws = new WebEventServer(undefined, onOpen, undefined, onMessage, undefined, true);
+		  }
+		  else
+			console.log("WebSocket NOT available.");
+		}
+		
+		function send(event, data)
+		{
+			ws.send(event + uid, data);
+		}
+		
+		function onTextChange(evt) {
+			console.log(evt.keyCode);
+			var ch = String.fromCharCode(evt.keyCode);
+			if (!evt.shiftKey) ch = ch.toLowerCase();
+			send(subject, ch);
+		}
+
+		function S4() {
+			return (((1+Math.random())*0x10000)|0).toString(16).substring(1); 
+		};
+		 
+		// then to call it, plus stitch in '4' in the third group
+		function newGuid() {
+			return (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
+		};
+
+		</script>
+	</head>
+	<body onload="initialize()">
+		<h1>WebEvent Demo</h1>
+		<textarea id="input" rows="10" cols="50"  onkeyup="onTextChange(event)"></textarea>
+	</body>
+</html>
